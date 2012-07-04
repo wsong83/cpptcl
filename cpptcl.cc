@@ -43,8 +43,6 @@
 
 using namespace Tcl;
 using namespace Tcl::details;
-//using namespace std;
-//using namespace boost;
 using std::string;
 using boost::shared_ptr;
 using std::map;
@@ -328,7 +326,7 @@ void post_process_policies(Tcl_Interp *interp, policies &pol,
 
 // generic callback handler
 extern "C"
-int callback_handler(ClientData, Tcl_Interp *interp,
+int callback_handler(ClientData cData, Tcl_Interp *interp,
      int objc, Tcl_Obj * CONST objv[])
 {
      callback_map::iterator it = callbacks.find(interp);
@@ -1081,10 +1079,11 @@ void interpreter::clear_definitions(Tcl_Interp *interp)
 }
 
 void interpreter::add_function(string const &name,
-     shared_ptr<callback_base> cb, policies const &p)
+                               shared_ptr<callback_base> cb, policies const &p, 
+                               ClientData cData)
 {
      Tcl_CreateObjCommand(interp_, name.c_str(),
-          callback_handler, 0, 0);
+          callback_handler, cData, 0);
 
      callbacks[interp_][name] = cb;
      call_policies[interp_][name] = p;
