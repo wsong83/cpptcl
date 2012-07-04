@@ -17,39 +17,48 @@
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
 #
-# Makefile
-# Due to be replace by autoconf tool suite
+# Top level Makefile
 # 04/07/2012   Wei Song
 #
 #
 
-INCDIRS = -I./ -I../
+# global variables
+export CXX = g++
 
-OUTPUTS = mymodule1.so example2 mymodule3.so mymodule4.so mymodule5.so example6 mymodule7.so
+export CXXFLAGS = -std=c++0x -Wall -g
+export LINKFLAGS = -ltcl8.5
 
-all : ${OUTPUTS}
+# local variables
+INCDIRS = -I./
+HEADERS = $(wildcard ./*.h)
+HEADERS += $(wildcard ./details/*.h)
 
-mymodule1.so : example1.cc ../cpptcl.o
-	$(CXX) -shared $(INCDIRS) $(CXXFLAGS) $< ../cpptcl.o -o $@
+# targets
+TESTDIRS = test
+EXAMPLEDIRS = examples
 
-example2 : example2.cc ../cpptcl.o
-	$(CXX) $(INCDIRS) $(CXXFLAGS) $< $(LINKFLAGS) ../cpptcl.o -o $@
+# actions
 
-mymodule3.so : example3.cc ../cpptcl.o
-	$(CXX) -shared $(INCDIRS) $(CXXFLAGS) $< ../cpptcl.o -o $@
+all: cpptcl.o
 
-mymodule4.so : example4.cc ../cpptcl.o
-	$(CXX) -shared $(INCDIRS) $(CXXFLAGS) $< ../cpptcl.o -o $@
+cpptcl.o : %.o:%.cc $(HEADERS)
+	$(CXX) $(INCDIRS) $(CXXFLAGS) -c $< -o $@
 
-mymodule5.so : example5.cc ../cpptcl.o
-	$(CXX) -shared $(INCDIRS) $(CXXFLAGS) $< ../cpptcl.o -o $@
+.PHONY: clean $(TESTDIRS) $(EXAMPLEDIRS)
 
-example6 : example6.cc ../cpptcl.o
-	$(CXX) $(INCDIRS) $(CXXFLAGS) $< $(LINKFLAGS) ../cpptcl.o -o $@
+test: cpptcl.o $(TESTDIRS)
 
-mymodule7.so : example7.cc ../cpptcl.o
-	$(CXX) -shared $(INCDIRS) $(CXXFLAGS) $< ../cpptcl.o -o $@
+example: cpptcl.o $(EXAMPLEDIRS)
 
+$(TESTDIRS):
+	$(MAKE) -C $@
 
-clean :
-	-rm -f ${OUTPUTS}
+$(EXAMPLEDIRS):
+	$(MAKE) -C $@
+
+clean:
+	-rm *.o
+	-for d in $(EXAMPLEDIRS); do $(MAKE) -C $$d clean; done
+	-for d in $(TESTDIRS); do $(MAKE) -C $$d clean; done
+	-rm bin/avs_shell
+
