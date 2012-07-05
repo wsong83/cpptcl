@@ -144,8 +144,8 @@ public:
      virtual ~callback_base() {}
 
      virtual void invoke(Tcl_Interp *interp,
-          int objc, Tcl_Obj * CONST objv[],
-          policies const &pol) = 0;
+                         int objc, Tcl_Obj * CONST objv[],
+                         policies const &pol, ClientData) = 0;
 };
 
 
@@ -229,6 +229,7 @@ public:
 
 // actual callback envelopes
 #include "details/callbacks.h"
+#include "details/callbacks_cd.h"
 
 // actual method envelopes
 #include "details/methods.h"
@@ -527,11 +528,11 @@ public:
     
     // using the last arg as a client data, but must be pointer
     template <typename R, typename T1>
-    void def(std::string const &name, R (*f)(T1), T1 *cData,
+    void def(std::string const &name, R (*f)(T1 *), T1 *cData,
              policies const &p = policies()) {
       add_function(name,
                    boost::shared_ptr<details::callback_base>
-                   (new details::callback1<R, T1>(f)), p, (ClientData)(cData));
+                   (new details::callback1_cd<R, T1>(f)), p, (ClientData)(cData));
     }
     
      template <typename R, typename T1, typename T2>
@@ -545,11 +546,11 @@ public:
     
     // using the last arg as a client data, but must be pointer
     template <typename R, typename T1, typename T2>
-    void def(std::string const &name, R (*f)(T1, T2), T2 *cData,
+    void def(std::string const &name, R (*f)(T1, T2 *), T2 *cData,
              policies const &p = policies()) {
       add_function(name,
                    boost::shared_ptr<details::callback_base>
-                   (new details::callback2<R, T1, T2>(f)), p, (ClientData)(cData));
+                   (new details::callback2_cd<R, T1, T2>(f)), p, (ClientData)(cData));
     }
     
      template <typename R, typename T1, typename T2, typename T3>
@@ -563,11 +564,11 @@ public:
     
     // using the last arg as a client data, but must be pointer
     template <typename R, typename T1, typename T2, typename T3>
-    void def(std::string const &name, R (*f)(T1, T2, T3), T3 *cData,
+    void def(std::string const &name, R (*f)(T1, T2, T3 *), T3 *cData,
              policies const &p = policies()) {
       add_function(name,
                    boost::shared_ptr<details::callback_base>
-                   (new details::callback3<R, T1, T2, T3>(f)), p, (ClientData)(cData));
+                   (new details::callback3_cd<R, T1, T2, T3>(f)), p, (ClientData)(cData));
     }
     
      template <typename R, typename T1, typename T2, typename T3, typename T4>
@@ -581,11 +582,11 @@ public:
     
     // using the last arg as a client data, but must be pointer
     template <typename R, typename T1, typename T2, typename T3, typename T4>
-    void def(std::string const &name, R (*f)(T1, T2, T3, T4), T4 *cData,
+    void def(std::string const &name, R (*f)(T1, T2, T3, T4 *), T4 *cData,
              policies const &p = policies()) {
       add_function(name,
                    boost::shared_ptr<details::callback_base>
-                   (new details::callback4<R, T1, T2, T3, T4>(f)), p, (ClientData)(cData));
+                   (new details::callback4_cd<R, T1, T2, T3, T4>(f)), p, (ClientData)(cData));
     }
     
      template <typename R, typename T1, typename T2, typename T3,
@@ -601,11 +602,11 @@ public:
     // using the last arg as a client data, but must be pointer
     template <typename R, typename T1, typename T2, typename T3,
               typename T4, typename T5>
-    void def(std::string const &name, R (*f)(T1, T2, T3, T4, T5), T5 *cData,
+    void def(std::string const &name, R (*f)(T1, T2, T3, T4, T5 *), T5 *cData,
              policies const &p = policies()) {
       add_function(name,
                    boost::shared_ptr<details::callback_base>
-                   (new details::callback5<R, T1, T2, T3, T4, T5>(f)), p, 
+                   (new details::callback5_cd<R, T1, T2, T3, T4, T5>(f)), p, 
                    (ClientData)(cData));
     }
     
@@ -622,11 +623,11 @@ public:
     // using the last arg as a client data, but must be pointer
     template <typename R, typename T1, typename T2, typename T3,
               typename T4, typename T5, typename T6>
-    void def(std::string const &name, R (*f)(T1, T2, T3, T4, T5, T6), T6 *cData,
+    void def(std::string const &name, R (*f)(T1, T2, T3, T4, T5, T6 *), T6 *cData,
              policies const &p = policies()) {
       add_function(name,
                    boost::shared_ptr<details::callback_base>
-                   (new details::callback6<R, T1, T2, T3, T4, T5, T6>(f)), p, 
+                   (new details::callback6_cd<R, T1, T2, T3, T4, T5, T6>(f)), p, 
                    (ClientData)(cData));
     }
     
@@ -644,11 +645,11 @@ public:
     // using the last arg as a client data, but must be pointer
     template <typename R, typename T1, typename T2, typename T3,
               typename T4, typename T5, typename T6, typename T7>
-    void def(std::string const &name, R (*f)(T1, T2, T3, T4, T5, T6, T7), T7 *cData,
+    void def(std::string const &name, R (*f)(T1, T2, T3, T4, T5, T6, T7 *), T7 *cData,
              policies const &p = policies()) {
       add_function(name,
                    boost::shared_ptr<details::callback_base>
-                   (new details::callback7<R,
+                   (new details::callback7_cd<R,
                                            T1, T2, T3, T4, T5, T6, T7>(f)), p, 
                    (ClientData)(cData));
     }
@@ -667,11 +668,11 @@ public:
     // using the last arg as a client data, but must be pointer
     template <typename R, typename T1, typename T2, typename T3,
               typename T4, typename T5, typename T6, typename T7, typename T8>
-    void def(std::string const &name, R (*f)(T1, T2, T3, T4, T5, T6, T7, T8), T8 *cData,
+    void def(std::string const &name, R (*f)(T1, T2, T3, T4, T5, T6, T7, T8 *), T8 *cData,
              policies const &p = policies()) {
       add_function(name,
                    boost::shared_ptr<details::callback_base>
-                   (new details::callback8<R,
+                   (new details::callback8_cd<R,
                                            T1, T2, T3, T4, T5, T6, T7, T8>(f)), p, 
                    (ClientData)(cData));
     }
@@ -694,11 +695,11 @@ public:
               typename T4, typename T5, typename T6, typename T7, typename T8,
               typename T9>
     void def(std::string const &name,
-             R (*f)(T1, T2, T3, T4, T5, T6, T7, T8, T9), T9 *cData,
+             R (*f)(T1, T2, T3, T4, T5, T6, T7, T8, T9 *), T9 *cData,
              policies const &p = policies()) {
       add_function(name,
                    boost::shared_ptr<details::callback_base>
-                   (new details::callback9<R,
+                   (new details::callback9_cd<R,
                                            T1, T2, T3, T4, T5, T6, T7, T8, T9>(f)), p, 
                    (ClientData)(cData));
     }

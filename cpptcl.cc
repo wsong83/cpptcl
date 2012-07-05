@@ -20,6 +20,9 @@
  */
 
 /* 
+ * Add extra argument to support client data
+ * 04/07/2012   Wei Song
+ *
  * implementation of the c++/Tcl package
  * small modification to resolve name conflicts between boost and std
  * 02/07/2012   Wei Song
@@ -374,7 +377,7 @@ int callback_handler(ClientData cData, Tcl_Interp *interp,
      
      try
      {
-          iti->second->invoke(interp, objc, objv, pol);
+       iti->second->invoke(interp, objc, objv, pol, cData);
 
           post_process_policies(interp, pol, objv, false);
      }
@@ -483,7 +486,7 @@ int constructor_handler(ClientData cd, Tcl_Interp *interp,
 
      try
      {
-          iti->second->invoke(interp, objc, objv, pol);
+       iti->second->invoke(interp, objc, objv, pol, cd);
 
           // if everything went OK, the result is the address of the
           // new object in the 'pXXX' form

@@ -25,7 +25,7 @@
 # global variables
 export CXX = g++
 
-export CXXFLAGS = -std=c++0x -Wall -g
+export CXXFLAGS = -std=c++0x -Wall -g -fPIC
 export LINKFLAGS = -ltcl8.5
 
 # local variables
