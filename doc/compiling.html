@@ -1,26 +1,38 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!DOCTYPE html>
 <html>
-<head>
-  <meta content="text/html; charset=ISO-8859-1"
- http-equiv="content-type">
-  <title>C++/Tcl</title>
-</head>
-<body>
-<table style="width: 100%; text-align: left;" border="0" cellpadding="2"
- cellspacing="20">
-  <tbody>
-    <tr>
-      <td style="vertical-align: top;"><font size="+3"><span
- style="font-family: helvetica,arial,sans-serif; font-weight: bold; color: rgb(0, 0, 255);">C++/Tcl</span></font><br>
-      <span
- style="font-family: helvetica,arial,sans-serif; color: rgb(0, 0, 255); font-weight: bold;">A
-C++ library for interoperability between C++ and Tcl</span> </td>
-      <td style="vertical-align: top; text-align: right;"><br>
-      </td>
-    </tr>
-  </tbody>
-</table>
-<br>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Cpptcl : C++/Tcl, a library that allows to easily integrate C++ and Tcl." />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Cpptcl</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/wsong83/cpptcl">View on GitHub</a>
+
+          <h1 id="project_title">Cpptcl</h1>
+          <h2 id="project_tagline">C++/Tcl, a library that allows to easily integrate C++ and Tcl. 1.1.4 (05/07/2012)</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/wsong83/cpptcl/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/wsong83/cpptcl/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+
+
 [<a href="errors.html">prev</a>][<a href="index.html">top</a>]<br>
 <h4>Compiling<br>
 </h4>
@@ -50,16 +62,12 @@ in scripts.<br>
 <h4>Unix, GNU/Linux</h4>
 On Unix-like systems, the following command is enough to compile a
 one-file C++/Tcl program (shown for FreeBSD):<br>
-<br>
 <code>$ g++ myprog.cc cpptcl.cc -o myprog
 -I/usr/local/include/tcl8.4 -I/usr/local/include/boost_1_33_0
--L/usr/local/lib -ltcl84<br>
-</code><br>
+-L/usr/local/lib -ltcl84</code><br>
 Similarly, the following compiles a simple loadable shared module:<br>
-<br>
 <code>$ g++ mymodule.cc cpptcl.cc -shared -o myprog
--I/usr/local/include/tcl8.4 -I/usr/local/include/boost_1_33_0<br>
-</code><br>
+-I/usr/local/include/tcl8.4 -I/usr/local/include/boost_1_33_0</code><br>
 Depending on the specific Unix system, it may be necessary to use
 different search paths.<br>
 Note also that a decent g++ compiler is necessary (in particular, g++
@@ -67,13 +75,19 @@ Note also that a decent g++ compiler is necessary (in particular, g++
 <br>
 The <code>Makefile</code>s provided with test and example programs
 should serve as good examples.<br>
-<br>
-<br>
-[<a href="errors.html">prev</a>][<a href="index.html">top</a>]<br>
-<br>
-<hr style="width: 100%; height: 2px;">Copyright &copy; 2004-2006,
-Maciej
-Sobczak<br>
-<br>
-</body>
+
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Cpptcl maintained by <a href="https://github.com/wsong83">wsong83</a></p>
+        <p>Copyright &copy; 2012, Wei Song; Copyright &copy; 2004-2006, Maciej Sobczak</p>
+      </footer>
+    </div>
+
+    
+
+  </body>
 </html>

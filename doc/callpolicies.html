@@ -1,26 +1,37 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!DOCTYPE html>
 <html>
-<head>
-  <meta content="text/html; charset=ISO-8859-1"
- http-equiv="content-type">
-  <title>C++/Tcl</title>
-</head>
-<body>
-<table style="width: 100%; text-align: left;" border="0" cellpadding="2"
- cellspacing="20">
-  <tbody>
-    <tr>
-      <td style="vertical-align: top;"><font size="+3"><span
- style="font-family: helvetica,arial,sans-serif; font-weight: bold; color: rgb(0, 0, 255);">C++/Tcl</span></font><br>
-      <span
- style="font-family: helvetica,arial,sans-serif; color: rgb(0, 0, 255); font-weight: bold;">A
-C++ library for interoperability between C++ and Tcl</span> </td>
-      <td style="vertical-align: top; text-align: right;"><br>
-      </td>
-    </tr>
-  </tbody>
-</table>
-<br>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Cpptcl : C++/Tcl, a library that allows to easily integrate C++ and Tcl." />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Cpptcl</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/wsong83/cpptcl">View on GitHub</a>
+
+          <h1 id="project_title">Cpptcl</h1>
+          <h2 id="project_tagline">C++/Tcl, a library that allows to easily integrate C++ and Tcl. 1.1.4 (05/07/2012)</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/wsong83/cpptcl/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/wsong83/cpptcl/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+
 [<a href="objects.html">prev</a>][<a href="index.html">top</a>][<a
  href="goodies.html">next</a>]<br>
 <h4>Call Policies</h4>
@@ -29,10 +40,8 @@ sinks</span><br>
 <br>
 C++ has extremely rich type system. You can see this when you expose
 some free or member function:<br>
-<br>
-<div style="margin-left: 40px;"><code>i.def("fun", fun);</code><br>
-</div>
-<br>
+<br><pre><code>i.def("fun", fun);
+</code></pre><br>
 The name of the function, <code>fun</code>, is enough for the C++/Tcl
 libray to discover the following information:<br>
 <ul>
@@ -43,32 +52,24 @@ their types.<br>
 </ul>
 Sadly, these two pieces of information are sometimes not enough.<br>
 Consider the following C++ functions:<br>
-<br>
-<div style="margin-left: 40px;"><code>SomeClass * produce()</code><br>
-<code>{</code><br>
-<code>&nbsp;&nbsp;&nbsp;&nbsp; return new SomeClass();</code><br>
-<code>}</code><br>
-<code></code><br>
-<code>void consume(SomeClass *p)</code><br>
-<code>{</code><br>
-<code>&nbsp;&nbsp;&nbsp;&nbsp; // ...</code><br>
-<code>&nbsp;&nbsp;&nbsp;&nbsp; delete p;</code><br>
-<code>}</code><br>
-<code></code></div>
-<br>
+<br><pre><code>SomeClass * produce() {
+  return new SomeClass();
+}
+
+void consume(SomeClass *p) {
+  // ...
+  delete p;
+}
+</code></pre><br>
 These two functions can be exposed this way:<br>
-<br>
-<div style="margin-left: 40px;"><code>i.def("produce", produce);</code><br>
-<code>i.def("consume", consume);</code><br>
-<code></code></div>
-<br>
+<br><pre><code>i.def("produce", produce);
+i.def("consume", consume);
+</code></pre><br>
 After doing so, you can safely use them like here:<br>
-<br>
-<div style="margin-left: 40px;"><code>% set object [produce]</code><br>
-<code>p0x807b790</code><br>
-<code>% consume $object</code><br>
-<code></code></div>
-<br>
+<br><pre><code>% set object [produce]
+p0x807b790
+% consume $object
+</code></pre><br>
 The problem is that the <code>produce</code> command will not register
 any new Tcl command that would be responsible for managing member
 function calls or explicit object destruction, because, simply, it has
@@ -78,11 +79,8 @@ returned by the <code>produce</code> command has no meaning to the Tcl
 interpreter.<br>
 To solve this problem, some additional information has to be provided
 while exposing the <code>produce</code> function:<br>
-<br>
-<div style="margin-left: 40px;"><code>i.def("produce", produce,
-factory("SomeClass"));</code><br>
-</div>
-<br>
+<br><pre><code>i.def("produce", produce, factory("SomeClass"));
+</code></pre><br>
 As you see, there is additional parameter that provides hints to the
 C++/Tcl library. Such hints are called <span
  style="font-style: italic;">policies</span>.<br>
@@ -119,11 +117,8 @@ which usually means a program crash).<br>
 In other words, we have to provide a hint to the C++/Tcl library that
 the <code>consume()</code> function is a <span
  style="font-style: italic;">sink</span> for objects:<br>
-<br>
-<div style="margin-left: 40px;"><code>i.def("consume", consume,
-sink(1));</code><br>
-</div>
-<br>
+<pre><code>i.def("consume", consume, sink(1));
+</code></pre><br>
 The <code>sink</code> policy above says:<br>
 <ul>
   <li>The <code>consume</code> function takes responsibility for
@@ -133,99 +128,76 @@ objects that are passed by its first (1) parameter.</li>
 unregistered.</li>
 </ul>
 The following is a complete example with the use of policies:<br>
-<br>
-<div style="margin-left: 40px;"><code>// example5.cc</code><br>
-<code></code><br>
-<code>#include "cpptcl.h"</code><br>
-<code>#include &lt;string&gt;</code><br>
-<code></code><br>
-<code>using namespace std;</code><br>
-<code>using namespace Tcl;</code><br>
-<code></code><br>
-<code>class Person</code><br>
-<code>{</code><br>
-<code>public:</code><br>
-<code>&nbsp;&nbsp;&nbsp;&nbsp; Person(string const &amp;n) : name(n) {}</code><br>
-<code></code><br>
-<code>&nbsp;&nbsp;&nbsp;&nbsp; void setName(string const &amp;n) { name
-= n; }</code><br>
-<code>&nbsp;&nbsp;&nbsp;&nbsp; string getName() { return name; }</code><br>
-<code></code><br>
-<code>private:</code><br>
-<code>&nbsp;&nbsp;&nbsp;&nbsp; string name;</code><br>
-<code>};</code><br>
-<code></code><br>
-<code>// this is a factory function</code><br>
-<code>Person * makePerson(string const &amp;name)</code><br>
-<code>{</code><br>
-<code>&nbsp;&nbsp;&nbsp;&nbsp; return new Person(name);</code><br>
-<code>}</code><br>
-<code></code><br>
-<code>// this is a sink function</code><br>
-<code>void killPerson(Person *p)</code><br>
-<code>{</code><br>
-<code>&nbsp;&nbsp;&nbsp;&nbsp; delete p;</code><br>
-<code>}</code><br>
-<code></code><br>
-<code>CPPTCL_MODULE(Mymodule, i)</code><br>
-<code>{</code><br>
-<code>&nbsp;&nbsp;&nbsp;&nbsp; // note that the Person class is exposed
-without any constructor</code><br>
-<code>&nbsp;&nbsp;&nbsp;&nbsp; i.class_&lt;Person&gt;("Person", <span
- style="font-weight: bold;">no_init</span>)</code><br>
-<code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-.def("setName", &amp;Person::setName)</code><br>
-<code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-.def("getName", &amp;Person::getName);</code><br>
-<code></code><br>
-<code>&nbsp;&nbsp;&nbsp;&nbsp; i.def("makePerson", makePerson, <span
- style="font-weight: bold;">factory("Person")</span>);</code><br>
-<code>&nbsp;&nbsp;&nbsp;&nbsp; i.def("killPerson", killPerson, <span
- style="font-weight: bold;">sink(1)</span>);</code><br>
-<code>}</code><br>
-<code></code></div>
-<br>
+<br><pre><code>// example5.cc
+
+#include "cpptcl.h"
+#include &lt;string&gt;
+
+using namespace std;
+using namespace Tcl;
+
+class Person {
+public:
+  Person(string const &amp;n) : name(n) {}
+
+  void setName(string const &amp;n) { name = n; }
+  string getName() { return name; }
+
+private:
+  string name;
+};
+
+// this is a factory function
+Person * makePerson(string const &amp;name) {
+  return new Person(name);
+}
+
+// this is a sink function
+void killPerson(Person *p) {
+  delete p;
+}
+
+CPPTCL_MODULE(Mymodule, i) {
+  // note that the Person class is exposed without any constructor
+  i.class_&lt;Person&gt;("Person", <span style="font-weight: bold;">no_init</span>)
+    .def("setName", &amp;Person::setName)
+    .def("getName", &amp;Person::getName);
+  
+  i.def("makePerson", makePerson, <span style="font-weight: bold;">factory("Person")</span>);
+  i.def("killPerson", killPerson, <span style="font-weight: bold;">sink(1)</span>);
+}
+</code></pre><br>
 Now, let's try to exercise some interactive session with this:<br>
-<br>
-<div style="margin-left: 40px;"><code>% load ./mymodule.so </code><br>
-<code>% set p [Person "Maciej"]</code><br>
-<code>invalid command name "Person"</code><br>
-<code>% </code><br>
-<code></code></div>
-<br>
+<br><pre><code>% load ./mymodule.so 
+% set p [Person "Maciej"]
+invalid command name "Person"
+% 
+</code></pre><br>
 As you see, the Tcl class <code>Person</code> has no constructor (this
 is the effect of providing the <code>no_init</code> policy when the
 class was exposed).<br>
 Let's try another way:<br>
-<br>
-<div style="margin-left: 40px;"><code>% set p [makePerson "John"]</code><br>
-<code>p0x807b810</code><br>
-<code>% $p getName</code><br>
-<code>John</code><br>
-<code>% </code><br>
-<code></code></div>
-<br>
+<br><pre><code>% set p [makePerson "John"]
+p0x807b810
+% $p getName
+John
+% 
+</code></pre><br>
 It works fine. Now:<br>
-<br>
-<div style="margin-left: 40px;"><code>% killPerson $p</code><br>
-<code>% $p getName</code><br>
-<code>invalid command name "p0x807b810"</code><br>
-<code>% </code><br>
-<code></code></div>
-<br>
+<br><pre><code>% killPerson $p
+% $p getName
+invalid command name "p0x807b810"
+% 
+</code></pre><br>
 <br>
 Interestingly, a single function may need to combine several policies
 at once:<br>
-<br>
-<div style="margin-left: 40px;"><code>ClassA * create(int i, ClassB
-*p1, string const &amp;s, ClassC *p2)</code><br>
-<code>{</code><br>
-<code>&nbsp;&nbsp;&nbsp;&nbsp; // consume both p1 and p2 pointers</code><br>
-<code>&nbsp;&nbsp;&nbsp;&nbsp; // and create new object:</code><br>
-<code>&nbsp;&nbsp;&nbsp;&nbsp; return new ClassA();</code><br>
-<code>}</code><br>
-<code></code></div>
-<br>
+<br><pre><code>ClassA * create(int i, ClassB *p1, string const &amp;s, ClassC *p2) {
+  // consume both p1 and p2 pointers
+  // and create new object:
+  return new ClassA();
+}
+</code></pre><br>
 This function needs to combine three policies:<br>
 <ol>
   <li>The <code>factory</code> policy, because it returns new objects.</li>
@@ -234,11 +206,8 @@ This function needs to combine three policies:<br>
   </li>
 </ol>
 The following definition does it:<br>
-<br>
-<div style="margin-left: 40px;"><code>i.def("create", create,
-factory("ClassA").sink(2).sink(4));</code><br>
-</div>
-<br>
+<br><pre><code>i.def("create", create, factory("ClassA").sink(2).sink(4));
+</code></pre><br>
 As you see, policies can be chained. Their order is not important,
 apart from the fact that the <code>factory</code> policy can be
 related to only one class, so it is the last <code>factory</code>
@@ -263,35 +232,28 @@ In order for the function (or constructor or method) to be variadic, <span
 must be true:<br>
 <ol>
   <li>The type of last (or the only) parameter must be <code>object
-const &amp;<br>
-    </code></li>
+const &amp;</code><br></li>
   <li>The <code>variadic()</code> policy must be provided when
 defining that function.</li>
 </ol>
 The last formal parameter is of the generic <code>object</code> type
 and it allows to retrieve both single values and lists.<br>
 An example may help:<br>
-<br>
-<div style="margin-left: 40px;"><code>void fun(int a, int b, <span
- style="font-weight: bold;">object const &amp;c</span>);<br>
-<br>
-// later:<br>
-</code><code>i.def("fun", fun);</code><br>
-<code></code></div>
-<br>
+<br><pre><code>void fun(int a, int b, <span style="font-weight: bold;">object const &amp;c</span>);
+
+// later:
+  i.def("fun", fun);
+</code></pre><br>
 Above, the fun() function is defined in the interpreter as having <span
  style="font-style: italic;">exactly</span> three parameters.<br>
 If more arguments are provided, they are discarded. If less, an error
 is reported.<br>
 Now, consider the following change:<br>
-<br>
-<div style="margin-left: 40px;"><code>void fun(int a, int b, <span
- style="font-weight: bold;">object const &amp;c</span>);<br>
-<br>
-// later:<br>
-</code><code>i.def("fun", fun, <span style="font-weight: bold;">variadic()</span>);</code><br>
-<code></code></div>
-<br>
+<br><pre><code>void fun(int a, int b, <span  style="font-weight: bold;">object const &amp;c</span>);
+
+// later:
+i.def("fun", fun, <span style="font-weight: bold;">variadic()</span>);
+</code></pre><br>
 With the <code>variadic()</code> policy, the function will accept:<br>
 <ul>
   <li>two integer arguments - in that case, the <code>c</code>
@@ -303,42 +265,31 @@ first two integer values.</li>
 </ul>
 Similarly, a constructor with variable list of parameters may be
 defined as:<br>
-<br>
-<div style="margin-left: 40px;"><code>class MyClass</code><br>
-<code>{</code><br>
-<code>public:</code><br>
-<code>&nbsp;&nbsp;&nbsp; MyClass(int a, <span
- style="font-weight: bold;">object const &amp;b</span>);</code><br>
-<code>&nbsp;&nbsp;&nbsp; void fun();</code><br>
-<code>};</code><br>
-<code></code><br>
-<code>// later:</code><br>
-<code>i.class_&lt;MyClass&gt;("MyClass", init&lt;int, <span
- style="font-weight: bold;">object const &amp;</span>&gt;(), <span
- style="font-weight: bold;">variadic()</span>)</code><br>
-<code>&nbsp;&nbsp;&nbsp; .def("fun", &amp;MyClass::fun);</code><br>
-<code></code></div>
-<br>
+<br><pre><code>class MyClass {
+public:
+  MyClass(int a, <span style="font-weight: bold;">object const &amp;b</span>);
+  void fun();
+};
+
+// later:
+i.class_&lt;MyClass&gt;("MyClass", init&lt;int, <span style="font-weight: bold;">object const &amp;</span>&gt;(), <span style="font-weight: bold;">variadic()</span>)
+  .def("fun", &amp;MyClass::fun);
+</code></pre><br>
 Note that the last parameter in the constructor has type <code>object
 const &amp;</code> and that the <code>variadic()</code> policy was
 provided.<br>
 This constructor will accept 1, 2 or more arguments.<br>
 <br>
 Of course, the variadic class methods can be defined in the same way:<br>
-<br>
-<div style="margin-left: 40px;"><code>class MyClass</code><br>
-<code>{</code><br>
-<code>public:</code><br>
-<code></code><code>&nbsp;&nbsp;&nbsp; void fun(<span
- style="font-weight: bold;">object const &amp;a</span>);</code><br>
-<code>};</code><br>
-<code></code><br>
-<code>// later:</code><br>
-<code>i.class_&lt;MyClass&gt;("MyClass")</code><br>
-<code>&nbsp;&nbsp;&nbsp; .def("fun", &amp;MyClass::fun, <span
- style="font-weight: bold;">variadic()</span>);</code><br>
-<code></code></div>
-<br>
+<br><pre><code>class MyClass {
+public:
+  void fun(<span style="font-weight: bold;">object const &amp;a</span>);
+};
+
+// later:
+i.class_&lt;MyClass&gt;("MyClass")
+  .def("fun", &amp;MyClass::fun, <span style="font-weight: bold;">variadic()</span>);
+</code></pre><br>
 As you see, the special, last parameter may be the only one, or
 preceded by any number of "normal" parameters.<br>
 <br>
@@ -350,55 +301,51 @@ other policies.<br>
 <br>
 The following is a full example of module that defines one variadic
 function:<br>
-<br>
-<div style="margin-left: 40px;"><code>#include "cpptcl.h"</code><br>
-<code></code><br>
-<code>using namespace Tcl;</code><br>
-<code></code><br>
-<code>int sumAll(object const &amp;argv)</code><br>
-<code>{</code><br>
-<code>&nbsp;&nbsp;&nbsp;&nbsp; interpreter i(argv.get_interp(), false);</code><br>
-<code></code><br>
-<code>&nbsp;&nbsp;&nbsp;&nbsp; int sum = 0;</code><br>
-<code></code><br>
-<code>&nbsp;&nbsp;&nbsp;&nbsp; size_t argc = argv.length(i);</code><br>
-<code>&nbsp;&nbsp;&nbsp;&nbsp; for (size_t indx = 0; indx != argc;
-++indx)</code><br>
-<code>&nbsp;&nbsp;&nbsp;&nbsp; {</code><br>
-<code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; object
-o(argv.at(i, indx));</code><br>
-<code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; sum +=
-o.get&lt;int&gt;(i);</code><br>
-<code>&nbsp;&nbsp;&nbsp;&nbsp; }</code><br>
-<code></code><br>
-<code>&nbsp;&nbsp;&nbsp;&nbsp; return sum;</code><br>
-<code>}</code><br>
-<code></code><br>
-<code>CPPTCL_MODULE(Mymodule, i)</code><br>
-<code>{</code><br>
-<code>&nbsp;&nbsp;&nbsp;&nbsp; i.def("sum", sumAll, variadic());</code><br>
-<code>}</code><br>
-<code></code></div>
-<br>
+<br><pre><code>#include "cpptcl.h"
+
+using namespace Tcl;
+
+int sumAll(object const &amp;argv) {
+  interpreter i(argv.get_interp(), false);
+
+  int sum = 0;
+
+  size_t argc = argv.length(i);
+  for (size_t indx = 0; indx != argc; ++indx) {
+    object o(argv.at(i, indx));
+    sum += o.get&lt;int&gt;(i);
+  }
+
+  return sum;
+}
+
+CPPTCL_MODULE(Mymodule, i) {
+  i.def("sum", sumAll, variadic());
+}
+</code></pre><br>
 This module can be used from the Tcl interpreter like here;<br>
-<br>
-<div style="margin-left: 40px;"><code>% load ./mymodule.so </code><br>
-<code>% sum</code><br>
-<code>0</code><br>
-<code>% sum 5</code><br>
-<code>5</code><br>
-<code>% sum 5 6 7</code><br>
-<code>18</code><br>
-<code>% </code><br>
-<code></code></div>
-<br>
-<br>
-[<a href="objects.html">prev</a>][<a href="index.html">top</a>][<a
- href="goodies.html">next</a>]<br>
-<br>
-<hr style="width: 100%; height: 2px;">Copyright &copy; 2004-2006,
-Maciej
-Sobczak<br>
-<br>
-</body>
+<br><pre><code>% load ./mymodule.so 
+% sum
+0
+% sum 5
+5
+% sum 5 6 7
+18
+% 
+</code></pre><br>
+
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Cpptcl maintained by <a href="https://github.com/wsong83">wsong83</a></p>
+        <p>Copyright &copy; 2012, Wei Song; Copyright &copy; 2004-2006, Maciej Sobczak</p>
+      </footer>
+    </div>
+
+    
+
+  </body>
 </html>
