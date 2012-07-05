@@ -97,6 +97,35 @@ This means that only <span style="font-style: italic;">input</span>
 parameters are supported (this may change in future versions of the
 libray).<br>
 
+<br>Starting from version 1.1.4, the last argument of the C++ function can be used to pass an environment data (currently it must be a pointer) to the function,
+which is realized by using the ClientData field of the Tcl APIs. The following example shows the usage of this extra argument: <br>
+<br><pre><code>// example test7.cc
+
+#include "cpptcl.h"
+
+static int gdata = 2;        // a global data
+
+void fun(int d, <span style="font-weight: bold;">int * gd</span>) {  // gd comes from environment
+  *gd += d;
+}
+
+int main() {
+  interpreter i;
+  
+  i.def("fun", fun, <span style="font-weight: bold;">&gdata</span>); // send gdata to the Tcl fun
+  
+  i.eval("fun 10");          // only one argument is passed by Tcl command
+  assert(gdata == 12);       // check the global data is changed
+
+  return 1;
+}
+</code></pre><br>
+
+For variadic functions, the generic <code>object</code> type should be the second last argument if the last one is used for environment data. Such as:<br>
+<br><pre><code>// a function with 3 typed arguments, one variadic object and one environment data
+double fun(int d1, long d2, std::string d3, <span style="font-weight: bold;">const object& var_arg</span>, <span style="font-weight: bold;">void * any_pointer</span>);
+</code></pre><br>
+
       </section>
     </div>
 
