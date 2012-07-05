@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Cpptcl : C++/Tcl, a library that allows to easily integrate C++ and Tcl." />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Cpptcl</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/wsong83/cpptcl">View on GitHub</a>
+
+          <h1 id="project_title">Cpptcl</h1>
+          <h2 id="project_tagline">C++/Tcl, a library that allows to easily integrate C++ and Tcl. 1.1.4 (05/07/2012)</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/wsong83/cpptcl/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/wsong83/cpptcl/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+
+
+[<a href="quickstart.html">prev</a>][<a href="index.html">top</a>][<a
+ href="classes.html">next</a>]<br>
+<h4>Exposing Free Functions<br>
+</h4>
+You have already seen an example of how to expose a free C++ function
+to the Tcl interpreter.<br>
+No matter whether you write an extension module or embed Tcl in a C++
+application, the way to expose a free function is alway the same:<br>
+<br><pre><code>i.def("tcl_function_name", cpp_function_name);
+</code></pre><br>
+where <code>i</code> is the name of the interpreter object.<br>
+In the above example, the <code>"tcl_function_name"</code> is a name
+that will be visible to the Tcl scripts and the <code>cpp_function_name</code>
+is a name of (or a pointer to) the function in the C++ code.<br>
+They do not have to be the same, although this is a usual practice,
+like in the <a href="quickstart.html">Quick Start</a> examples:<br>
+<br><pre><code>i.def("hello", hello);
+</code></pre><br>
+In fact, anything that is a valid command name in Tcl can be used as
+the first parameter.<br>
+For example, let's suppose that we want to expose the following C++
+function:<br>
+<br><pre><code>int sum(int a, int b) {
+  return a + b;
+}
+</code></pre><br>
+later we can define it in the interpreter like this:<br>
+<br><pre><code>i.def("sum", sum);
+i.def("+", sum);
+</code></pre><br>
+so that we can call the <code>sum</code> function from Tcl like this:<br>
+<br><pre><code>add 3 4
+</code></pre><br>
+or:<br>
+<br><pre><code>+ 3 4
+</code></pre><br>
+As you see, the same function can be defined in the interpreter more
+than once, with different Tcl names.<br>
+If you try to define some function with the name that is already
+registered, the old registration will be overwritten.<br>
+<br>
+You have also noticed that the exposed functions can have parameters
+and return values.<br>
+Functions with up to 9 parameters can be exposed.<br>
+<br>
+At the moment, parameters and the return value of exposed functions can
+have the following types:<br>
+<ul>
+  <li>std::string, char const *<br>
+  </li>
+  <li>int,</li>
+  <li>long,</li>
+  <li>bool,</li>
+  <li>double,</li>
+  <li>pointer to arbitrary type</li>
+  <li><a href="objects.html">object</a><br>
+  </li>
+</ul>
+In addition, the parameter of the function can be of type <code>T
+const &amp;</code>, where T is any of the above.<br>
+This means that only <span style="font-style: italic;">input</span>
+parameters are supported (this may change in future versions of the
+libray).<br>
+
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Cpptcl maintained by <a href="https://github.com/wsong83">wsong83</a></p>
+        <p>Copyright &copy; 2012, Wei Song; Copyright &copy; 2004-2006, Maciej Sobczak</p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>

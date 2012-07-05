@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Cpptcl : C++/Tcl, a library that allows to easily integrate C++ and Tcl." />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Cpptcl</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/wsong83/cpptcl">View on GitHub</a>
+
+          <h1 id="project_title">Cpptcl</h1>
+          <h2 id="project_tagline">C++/Tcl, a library that allows to easily integrate C++ and Tcl. 1.1.4 (05/07/2012)</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/wsong83/cpptcl/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/wsong83/cpptcl/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+
+
+
+[<a href="classes.html">prev</a>][<a href="index.html">top</a>][<a
+ href="callpolicies.html">next</a>]<br>
+<h4>Objects and Lists</h4>
+In order to help with managing Tcl lists, there is an object wrapper
+that allows to manipulate Tcl objects.<br>
+The class <code>object</code> provides the following members:<br>
+<br>
+1. Constructors<br>
+<br><pre><code>object();
+explicit object(bool b);
+object(char const *buf, size_t size);
+explicit object(double b);
+explicit object(int i);
+
+template &lt;class InputIterator&gt;
+object(InputIterator first, InputIterator last);
+
+explicit object(long i);
+explicit object(char const *s);
+explicit object(std::string const &amp;s);
+</code></pre><br>
+The above constructors allow to create a Tcl object from common C++
+types.<br>
+The constructor accepting iterators is for the list creation. The
+provided iterator type should give either <code>object</code> or <code>Tcl_Obj*</code>
+type when dereferenced.<br>
+<br>
+2. Copy constructors<br>
+<br><pre><code>explicit object(Tcl_Obj *o, bool shared = false);
+object(object const &amp;other, bool shared = false);
+</code></pre><br>
+If the <code>shared</code> flag is set, the newly created object
+wrapper will not duplicate the underlying Tcl object.<br>
+<br>
+3. Assignment-related members<br>
+<br><pre><code>object &amp; assign(bool b);
+object &amp; resize(size_t size);                        // byte array resize
+object &amp; assign(char const *buf, size_t size);       // byte array assignment
+object &amp; assign(double d);
+object &amp; assign(int i);
+
+template &lt;class InputIterator&gt;
+object &amp; assign(InputIterator first, InputIterator last);
+
+object &amp; assign(long l);
+object &amp; assign(char const *s);
+object &amp; assign(std::string const &amp;s);
+object &amp; assign(object const &amp;o);
+object &amp; assign(Tcl_Obj *o);
+
+object &amp; operator=(bool b);
+object &amp; operator=(double d);
+object &amp; operator=(int i);
+object &amp; operator=(long l);
+object &amp; operator=(char const *s);
+object &amp; operator=(std::string const &amp;s);
+
+object &amp; operator=(object const &amp;o);
+object &amp; swap(object &amp;other);
+</code></pre><br>
+The <code>assign</code> member function accepting iterators is for the
+list assignment. The provided iterator type should give either <code>object</code>
+or <code>Tcl_Obj*</code> type when dereferenced.<br>
+<br>
+4. Non-modifying accessors<br>
+<br><pre><code>template &lt;typename T&gt;
+T get(interpreter &amp;i) const;
+
+char const * get() const;                       // string get
+char const * get(size_t &amp;size) const;           // byte array get
+
+size_t length(interpreter &amp;i) const;&nbsp;           // returns list length
+object at(interpreter &amp;i, size_t index) const;
+
+Tcl_Obj * get_object() const { return obj_; }
+</code></pre><br>
+The <code>get&lt;T&gt;</code> template is specialized for the
+following types:<br>
+<ul>
+  <li><code>bool</code></li>
+  <li><code>vector&lt;char&gt;</code> (for byte array queries)</li>
+  <li><code>double</code></li>
+  <li><code>int</code></li>
+  <li><code>long</code></li>
+  <li><code>char const *</code></li>
+  <li><code>std::string</code><br>
+  </li>
+</ul>
+5. List-related modifiers<br>
+<br><pre><code>object &amp; append(interpreter &amp;i, object const &amp;o);
+object &amp; append_list(interpreter &amp;i, object const &amp;o);
+
+template &lt;class InputIterator&gt;
+object &amp; replace(Interpreter &amp;i, size_t index, size_t count,
+                 InputIterator first, InputIterator last);
+
+object &amp; replace(interpreter &amp;i, size_t index, size_t count, object const &amp;o);
+object &amp; replace_list(interpreter &amp;i, size_t index, size_t count, object const &amp;o);
+</code></pre><br>
+6. Additional helpers<br>
+<br><pre><code>void set_interp(Tcl_Interp *interp);
+Tcl_Interp * get_interp() const;
+</code></pre><br>
+These functions may help to transmit the information about the
+"current" interpreter when the C++ function accepting <code>object</code>
+parameter is called from Tcl.<br>
+The <code>set_interp</code> function is automatically called by the
+underlying
+conversion logic, so that the C++ code can use the other function for
+accessing the interpreter.<br>
+This may be useful when the C++ code needs to invoke other functions
+that may change the interpreter state.<br>
+<br>
+Note: If there is any need to extract the interpreter from the existing
+object, it may be helpful to wrap the resulting raw pointer into the <code>interpreter</code>
+object, which will not disrupt its normal lifetime:<br>
+<br><pre><code>interpreter i(o.get_interp(), false);
+</code></pre><br>
+The second parameter given to the <code>interpreter</code> constructor
+means that the newly created <code>i</code> object will not claim
+ownership to the pointer received from <code>get_interp()</code>.<br>
+In other words, the destructor of the object <code>i</code> will not
+free the actual interpreter.<br>
+<br>
+<br>
+<span style="font-weight: bold;">Example:</span><br>
+<br>
+The following complete program creates the list of numbers, sorts it
+using the Tcl interpreter and prints the results on the console (note:
+this is not the most efficient way to sort numbers in C++!):<br>
+<br><pre><code>// example6.cc
+
+#include "../cpptcl.h"
+#include &lt;iostream&gt;
+
+using namespace std;
+using namespace Tcl;
+
+int main() {
+  interpreter i;
+
+  int numbers[] = {5, 7, 1, 6, 3, 9, 7};
+  size_t elems = sizeof(numbers) / sizeof(int);
+
+  object tab;
+  for (size_t indx = 0; indx != elems; ++indx) {
+    tab.append(i, object(numbers[indx]));
+  }
+
+  object cmd("lsort -integer");
+  cmd.append(i, tab);
+
+  // here, cmd contains the following:
+  // lsort -integer {5 7 1 6 3 9 7}
+
+  object result = i.eval(cmd);
+
+  cout &lt;&lt; "unsorted: ";
+  for (size_t indx = 0; indx != elems; ++indx) {
+    cout &lt;&lt; numbers[indx] &lt;&lt; ' ';
+   }
+
+  cout &lt;&lt; "\n&nbsp; sorted: ";
+  elems = result.length(i);
+  for (size_t indx = 0; indx != elems; ++indx) {
+    object obj(result.at(i, indx));
+    int val = obj.get&lt;int&gt;(i);
+
+    cout &lt;&lt; val &lt;&lt; ' ';
+  }
+  cout &lt;&lt; '\n';
+}
+</code></pre><br>
+When this program is run, it gives the following output:<br>
+<br><pre><code>$ ./example6
+unsorted: 5 7 1 6 3 9 7
+  sorted: 1 3 5 6 7 7 9
+$ 
+</code></pre><br>
+In this example, an empty <code>tab</code> object is created and all
+numbers are appended to it to form a Tcl list of numbers.<br>
+After that, the sorting command is composed and executed (as you see,
+the <code>object</code> can be passed for evaluation).<br>
+The result of the command is retrieved also in the form of object
+wrapper, which is used to decompose the resulting list into its
+elements.<br>
+
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Cpptcl maintained by <a href="https://github.com/wsong83">wsong83</a></p>
+        <p>Copyright &copy; 2012, Wei Song; Copyright &copy; 2004-2006, Maciej Sobczak</p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>

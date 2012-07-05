@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Cpptcl : C++/Tcl, a library that allows to easily integrate C++ and Tcl." />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Cpptcl</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/wsong83/cpptcl">View on GitHub</a>
+
+          <h1 id="project_title">Cpptcl</h1>
+          <h2 id="project_tagline">C++/Tcl, a library that allows to easily integrate C++ and Tcl. 1.1.4 (05/07/2012)</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/wsong83/cpptcl/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/wsong83/cpptcl/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+
+
+
+[<a href="index.html">top</a>][<a href="freefun.html">next</a>]<br>
+<h4>Quick Start</h4>
+The C++/Tcl library allows to easily integrate these two languages.<br>
+It is easy to both extend the Tcl interpreter and to embed the Tcl
+interpreter in a regular C++ code.<br>
+<br>
+<h4><a name="extending"></a>Hello World (extending Tcl)<br>
+</h4>
+Let's take the following C++ file:<br><br>
+<pre><code>// example1.cc
+#include "cpptcl.h"
+#include &lt;iostream&gt;
+
+using namespace std;
+
+void hello() {
+  cout << "Hello C++/Tcl!" << endl;
+}
+
+CPPTCL_MODULE(Mymodule, i) {
+  i.def("hello", hello);
+}
+</code></pre><br>
+After compiling (let's suppose that the resulting shared library is
+named <code>mymodule.so</code>), we can do this:<br><br>
+<pre><code>$ tclsh
+% load ./mymodule.so
+% hello
+Hello C++/Tcl!
+% for {set i 0} {$i != 4} {incr i} { hello }
+Hello C++/Tcl!
+Hello C++/Tcl!
+Hello C++/Tcl!
+Hello C++/Tcl!
+%
+</code></pre><br>
+In other words, the Tcl interpreter was <span
+ style="font-style: italic;">extended</span> with the loadable module
+(which is a shared library) that provides the definition of new command.<br><br>
+<pre><code>// example2.cc
+
+#include "cpptcl.h"
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+
+using namespace std;
+using namespace Tcl;
+
+void hello() {
+  cout << "Hello C++/Tcl!" << endl;
+}
+
+int main() {
+  interpreter i;
+  i.def("hello", hello);
+
+  string script = "for {set i 0} {$i != 4} {incr i} { hello }";
+
+  i.eval(script);
+}
+</code></pre><br>
+After compiling, it gives the following result:<br>
+<br><pre><code>$ ./example2
+Hello C++/Tcl!
+Hello C++/Tcl!
+Hello C++/Tcl!
+Hello C++/Tcl!
+$
+</code></pre><br>
+In other words, the Tcl interpreter exists in a C++ application as a
+regular object.<br>
+It is possible to define new commands in this interpreter and execute
+arbitrary Tcl scripts in it, so that C++ and Tcl communicate with each
+other.<br>
+
+
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Cpptcl maintained by <a href="https://github.com/wsong83">wsong83</a></p>
+        <p>Copyright &copy; 2012, Wei Song; Copyright &copy; 2004-2006, Maciej Sobczak</p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>

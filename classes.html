@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Cpptcl : C++/Tcl, a library that allows to easily integrate C++ and Tcl." />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Cpptcl</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/wsong83/cpptcl">View on GitHub</a>
+
+          <h1 id="project_title">Cpptcl</h1>
+          <h2 id="project_tagline">C++/Tcl, a library that allows to easily integrate C++ and Tcl. 1.1.4 (05/07/2012)</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/wsong83/cpptcl/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/wsong83/cpptcl/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+
+
+
+[<a href="freefun.html">prev</a>][<a href="index.html">top</a>][<a
+ href="objects.html">next</a>]<br>
+<h4>Exposing Classes<br>
+</h4>
+Exposing classes is a little bit more involving, since there is more
+than name that needs to be defined.<br>
+Let's suppose that we have the following C++ class:<br>
+<br><pre><code>class Person {
+public:
+  void setName(string const &n) { name = n; }
+  string getName() { return name; }
+
+private:
+  string name;
+};
+</code></pre><br>
+We can expose this class in some extension (or to the embedded
+interpreter) like this:<br>
+<br><pre><code>CPPTCL_MODULE(Mymodule, i) {
+  i.class_&lt;Person&gt;("Person")
+    .def("setName", &Person::setName);
+    .def("getName", &Person::getName);
+}
+</code></pre><br>
+Note: The i parameter to the <code>CPPTCL_MODULE</code> macro is a
+name that you
+later use to refer to the interpreter. You can choose whatever name you
+like. The rest of the code is the same as if the following object was
+declared in the C++ program:<br>
+<br><pre><code>interpreter i;
+</code></pre><br>
+Anyway - as you see, the class is defined using the <code>class_</code>
+member function template, called on the interpreter object (it could
+not be named "class", since that is a keyword in C++).<br>
+The string name that is provided as a parameter to the <code>class_</code>
+function is a name that will be visible to the Tcl scripts - again, it
+does not have to be the name of the C++ class that you use in code.<br>
+<br>
+<h4><a name="members"></a>Member functions</h4>
+This special <code>class_</code> function returns an object that can
+be used to define class member functions, in the same expression and in
+a chained way.<br>
+The above example is written in three lines just to make it more
+readable, but it is a single C++ instruction:<br>
+<br><pre><code>i.class_&lt;Person&gt;("Person").def("setName", &Person::setName).def("getName", &Person::getName);
+</code></pre><br>
+The rules for defining class member functions are the same as the rules
+used for <a href="freefun.html">Exposing Free Functions</a>.<br>
+<br>
+After the class is exposed, it can be used in the following way (let's
+suppose that the above was compiled to the shared library named <code>mymodule.so</code>):<br>
+<br><pre><code>% load ./mymodule.so
+% set p [Person]
+p0x807b790
+% $p setName "Maciej"
+% $p getName
+Maciej
+%
+</code></pre><br>
+As you see, there is a <code>Person</code> command that creates and
+returns a new object. This is simply a constructor of our class. It
+returns a name of the new object (here it is <code>p0x807b790 - </code>it
+may be different on your machine or when you run the same program
+twice; you should not attach any external meaning to this name) and
+this name is immediately available as a new command, to use with member
+functions.<br>
+For example, the expression:<br>
+<br><pre><code>% $p setName "Maciej"
+</code></pre><br>
+calls the member function <code>setName</code> with the parameter <code>"Maciej"</code>,
+on the object whose name is stored in the variable <code>p</code>.<br>
+Later, the expression:<br>
+<br><pre><code>% $p getName
+</code></pre><br>
+calls the member function <code>getName</code> without any parameters
+and it returns the <code>string</code> result of that call.<br>
+<br>
+<h4><a name="constructors"></a>Constructors</h4>
+In the above example, the class <code>Person</code> has no
+constructors. Or, to be strict, it has a default constructor without
+parameters.<br>
+The <code>Person</code> class could be exposed also in the following
+way:<br>
+<br><pre><code>i.class_&lt;Person&gt;("Person", <span style="font-weight: bold;">init<></span>())
+  .def("setName", &Person::setName)
+  .def("getName", &Person::getName);
+</code></pre><br>
+As you see, there is a special <code>init</code> object provided. It
+can carry information about the expected parameters that are needed for
+constructor, as in the following full example:<br>
+<br><pre><code>// example4.cc
+#include "cpptcl.h"
+#include <string>
+
+using namespace std;
+using namespace Tcl;
+
+class Person {
+public:
+  <span style="font-weight: bold;">Person(string const &n) : name(n) {}</span>
+
+  void setName(string const &n) { name = n; }
+  string getName() { return name; }
+
+private:
+  string name;
+};
+
+CPPTCL_MODULE(Mymodule, i) {
+  i.class_&lt;Person&gt;("Person", <span style="font-weight: bold;">init&lt;string const &&gt;()</span>)
+    .def("setName", &Person::setName)
+    .def("getName", &Person::getName);
+}
+</code></pre><br>
+The <code>init</code> object can bring with it information about the
+number and the types of parameters needed by the constructor.<br>
+Above, it declares that the constructor of class <code>Person</code>
+needs 1 parameter of type <code>string const &amp;</code>.<br>
+This means that we cannot use this exposed class from the Tcl script
+the same way as before:<br>
+<br><pre><code>% set p [Person]
+Too few arguments.
+% 
+</code></pre><br>
+Instead, we have to provide required parameters:<br>
+<br><pre><code>% set p [Person "Maciej"]
+p0x807b7c0
+% $p getName
+Maciej
+%
+</code></pre><br>
+Constructors with up to 9 parameters can be defined this way.<br>
+<br>
+Another form that may be sometimes useful is:<br>
+<br><pre><code>i.class_&lt;Person&gt;("Person", <span style="font-weight: bold;">no_init</span>)
+    .def("setName", &Person::setName);
+    .def("getName", &Person::getName);
+</code></pre><br>
+This basically means that the exposed class has no
+constructors at all (or, to be strict, we do not want them to be
+visible from Tcl).<br>
+Objects of such classes need to be created by separate factory
+functions.<br>
+<br>
+<h4><a name="destructors"></a>Destructors</h4>
+There is additional "member function" that is automatically defined for
+each class, which is used for destroying the object:<br>
+<br><pre><code>% $p -delete
+</code></pre><br>
+Once this is done, the object itself is destroyed and the associated
+command is removed from the interpreter.<br>
+This means that the name stored in the variable p cannot be used for
+executing member functions any more:<br>
+<br><pre><code>% $p getName
+invalid command name "p0x807b790"
+%
+</code></pre><br>
+
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Cpptcl maintained by <a href="https://github.com/wsong83">wsong83</a></p>
+        <p>Copyright &copy; 2012, Wei Song; Copyright &copy; 2004-2006, Maciej Sobczak</p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>

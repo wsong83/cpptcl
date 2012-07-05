@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Cpptcl : C++/Tcl, a library that allows to easily integrate C++ and Tcl." />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Cpptcl</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/wsong83/cpptcl">View on GitHub</a>
+
+          <h1 id="project_title">Cpptcl</h1>
+          <h2 id="project_tagline">C++/Tcl, a library that allows to easily integrate C++ and Tcl. 1.1.4 (05/07/2012)</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/wsong83/cpptcl/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/wsong83/cpptcl/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+
+
+[<a href="errors.html">prev</a>][<a href="index.html">top</a>]<br>
+<h4>Compiling<br>
+</h4>
+The C++/Tcl library consists of the following files:<br>
+<ul>
+  <li><code>cpptcl.h</code> - to be <code>#include</code>d in your own
+projects,<br>
+  </li>
+  <li><code>cpptcl.cc</code> - to be linked with your own projects,</li>
+  <li>a couple of additional files in the <code>details</code>
+directory - this directory should be visible on the include search path.<br>
+  </li>
+</ul>
+The C++/Tcl library depends on the Tcl core library and on the Boost
+library (see <a target="_blank" href="http://www.boost.org/">http://www.boost.org/</a>).
+Any recent version of these two should work fine.<br>
+<br>
+Note: The Boost library is used in a way that does not require its
+installation nor even compilation. It is enough to just download the
+Boost distribution and unpack it in a place where it will be found by
+the compiler.<br>
+<br>
+Note: In its current version, the C++/Tcl library is not thread-safe in
+the sense that it should not be used in the multithreaded environment,
+where many threads can register new commands or use extended commands
+in scripts.<br>
+<h4>Unix, GNU/Linux</h4>
+On Unix-like systems, the following command is enough to compile a
+one-file C++/Tcl program (shown for FreeBSD):<br>
+<code>$ g++ myprog.cc cpptcl.cc -o myprog
+-I/usr/local/include/tcl8.4 -I/usr/local/include/boost_1_33_0
+-L/usr/local/lib -ltcl84</code><br>
+Similarly, the following compiles a simple loadable shared module:<br>
+<code>$ g++ mymodule.cc cpptcl.cc -shared -o myprog
+-I/usr/local/include/tcl8.4 -I/usr/local/include/boost_1_33_0</code><br>
+Depending on the specific Unix system, it may be necessary to use
+different search paths.<br>
+Note also that a decent g++ compiler is necessary (in particular, g++
+2.95 or 2.96 will not work).<br>
+<br>
+The <code>Makefile</code>s provided with test and example programs
+should serve as good examples.<br>
+
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Cpptcl maintained by <a href="https://github.com/wsong83">wsong83</a></p>
+        <p>Copyright &copy; 2012, Wei Song; Copyright &copy; 2004-2006, Maciej Sobczak</p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
