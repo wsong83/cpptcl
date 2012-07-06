@@ -32,6 +32,7 @@ export LINKFLAGS = -ltcl8.5
 INCDIRS = -I./
 HEADERS = $(wildcard ./*.h)
 HEADERS += $(wildcard ./details/*.h)
+HEADERS += $(wildcard ./preproc/*.hpp)
 
 # targets
 TESTDIRS = test
