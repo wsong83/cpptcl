@@ -42,6 +42,6 @@ int main() {
   i.eval("fun 10");          // only one argument is passed by Tcl command
   assert(gdata == 12);       // check the global data is changed
 
-  return 1;
+  return 0;
 }
 

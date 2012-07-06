@@ -294,6 +294,40 @@ private:
      functor_type f_;
 };
 
+template <typename R, typename T1, typename T2, typename T3, typename T4,
+  typename T5, typename T6, typename T7, typename T8, typename T9, typename T10>
+class callback10_cd : public callback_base
+{
+  typedef R (*functor_type)(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10 *);
+     
+public:
+     callback10_cd(functor_type f) : f_(f) {}
+     
+     virtual void invoke(Tcl_Interp *interp,
+                         int objc, Tcl_Obj * CONST objv[],
+                         policies const &, ClientData cd)
+     {
+          check_params_no(objc, 10);
+          
+          dispatch<R>::
+            template do_dispatch<T1, T2, T3, T4, T5, 
+            T6, T7, T8, T9, T10 *>(interp, f_,
+                            tcl_cast<T1>::from(interp, objv[1]),
+                            tcl_cast<T2>::from(interp, objv[2]),
+                            tcl_cast<T3>::from(interp, objv[3]),
+                            tcl_cast<T4>::from(interp, objv[4]),
+                            tcl_cast<T5>::from(interp, objv[5]),
+                            tcl_cast<T6>::from(interp, objv[6]),
+                            tcl_cast<T7>::from(interp, objv[7]),
+                            tcl_cast<T8>::from(interp, objv[8]),
+                            tcl_cast<T9>::from(interp, objv[9]),
+                            static_cast<T10 *>(cd));
+     }
+
+private:
+     functor_type f_;
+};
+
 template <typename R, typename T2>
   class callback2_cd<R, object const &, T2> : public callback_base
 {
@@ -532,6 +566,43 @@ public:
                       tcl_cast<T7>::from(interp, objv[7]),
                       t8,
                       static_cast<T9 *>(cd));
+     }
+
+private:
+     functor_type f_;
+};
+
+template <typename R, typename T1, typename T2, typename T3, typename T4,
+  typename T5, typename T6, typename T7, typename T8, typename T10>
+  class callback10_cd<R, T1, T2, T3, T4, T5, T6, T7, T8, object const &, T10>
+     : public callback_base
+{
+     typedef object const & T9;
+     typedef R (*functor_type)(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10 *);
+     enum { var_start = 9 };
+     
+public:
+     callback10_cd(functor_type f) : f_(f) {}
+     
+     virtual void invoke(Tcl_Interp *interp,
+                         int objc, Tcl_Obj * CONST objv[],
+                         policies const &pol, ClientData cd)
+     {
+          object t9 = get_var_params(interp, objc, objv, var_start, pol);
+          dispatch<R>::template do_dispatch<
+               T1, T2, T3, T4, T5, T6, T7, 
+            T8, T9, T10 *>(
+                      interp, f_,
+                      tcl_cast<T1>::from(interp, objv[1]),
+                      tcl_cast<T2>::from(interp, objv[2]),
+                      tcl_cast<T3>::from(interp, objv[3]),
+                      tcl_cast<T4>::from(interp, objv[4]),
+                      tcl_cast<T5>::from(interp, objv[5]),
+                      tcl_cast<T6>::from(interp, objv[6]),
+                      tcl_cast<T7>::from(interp, objv[7]),
+                      tcl_cast<T8>::from(interp, objv[8]),
+                      t9,
+                      static_cast<T10 *>(cd));
      }
 
 private:
