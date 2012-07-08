@@ -20,12 +20,11 @@
  */
 
 /* 
+ * Add support for adding/deleting traces for a variable
+ * Using boost preprocessor to reduce the burden of writing templates
  * Add extra argument to support client data
- * 04/07/2012   Wei Song
- *
- * implementation of the c++/Tcl package
- * small modification to resolve name conflicts between boost and std
- * 02/07/2012   Wei Song
+ * Small modification to resolve name conflicts between boost and std
+ * 02/07/2012 ~ 07/07/2012   Wei Song
  *
  */
 
@@ -41,14 +40,15 @@
 #include "cpptcl.h"
 #include <map>
 #include <sstream>
-#include <iterator>
-
+#include <boost/lexical_cast.hpp>
+#include <boost/foreach.hpp>
 
 using namespace Tcl;
 using namespace Tcl::details;
 using std::string;
 using boost::shared_ptr;
 using std::map;
+using std::pair;
 using std::vector;
 using std::ostringstream;
 using std::istringstream;
@@ -229,6 +229,13 @@ typedef map<Tcl_Interp *, callback_interp_map> callback_map;
 callback_map callbacks;
 callback_map constructors;
 
+  // map of polymorphic variable traces
+  typedef map<void *, pair<shared_ptr<trace_base>, int > > trace_record_map;
+  typedef map<string, trace_record_map> trace_interp_map;
+  typedef map<Tcl_Interp *, trace_interp_map> trace_map;
+
+  trace_map traces;
+
 // map of call policies
 typedef map<string, policies> policies_interp_map;
 typedef map<Tcl_Interp *, policies_interp_map> policies_map;
@@ -394,6 +401,43 @@ int callback_handler(ClientData cData, Tcl_Interp *interp,
      }
      
      return TCL_OK;
+}
+
+// generic trace handler
+static char err_msg_trace_no_interp[] = "Trying to invoke non-existent trace (wrong interpreter?)";
+static char err_msg_trace_no_var[] = "Trying to invoke non-existent trace (wrong variable name?)";
+static char err_msg_trace_unknown[] = "Unknown error.";
+
+extern "C"
+char * trace_handler(ClientData cData, Tcl_Interp *interp,
+                     const char * VarName, const char* index, int flags) {
+  if(!traces.count(interp)) {   // interp not found
+    return err_msg_trace_no_interp;
+  }
+     
+  string map_name(VarName);
+  string name2;
+  if(index != NULL) name2 = string(index);
+  map_name += "_";
+  map_name += name2;
+
+  if(!traces[interp].count(map_name)) {
+    return err_msg_trace_no_var;
+  }
+  
+  typedef pair<void * const, pair<shared_ptr<details::trace_base>, int> > trace_record;
+  BOOST_FOREACH(trace_record& m, traces[interp][map_name]) {
+    if(m.second.second & flags) {
+      try {
+        m.second.first->invoke(interp, cData, VarName, index, flags);
+      } catch (...) {           // the return type of char * is painfully difficult to cope with
+        return err_msg_trace_unknown;
+      }
+    }
+  }
+
+  // OK
+  return NULL;
 }
 
 // generic "object" command handler
@@ -826,11 +870,14 @@ char const * object::get<char const *>(interpreter &) const
 }
 
 template <>
-string object::get<string>(interpreter &) const
-{
-     int len;
-     char const *buf = Tcl_GetStringFromObj(obj_, &len);
-     return string(buf, buf + len);
+string object::get<string>(interpreter &) const {
+  return get_string();
+}
+
+string object::get_string() const {
+  int len;
+  char const *buf = Tcl_GetStringFromObj(obj_, &len);
+  return string(buf, buf + len);
 }
 
 char const * object::get() const
@@ -1092,6 +1139,78 @@ void interpreter::add_function(string const &name,
      call_policies[interp_][name] = p;
 }
 
+void interpreter::add_trace(const string& VarName, unsigned int *index,  
+                            shared_ptr<trace_base> proc,
+                            void * cData, int flag) {
+  string map_name = VarName + "_";
+  if(index == NULL) {           // type 1
+    Tcl_TraceVar(interp_, VarName.c_str(), flag, trace_handler, cData);
+  } else {                      // type 2
+    string name2 = boost::lexical_cast<string>(*index);
+    Tcl_TraceVar2(interp_, VarName.c_str(), name2.c_str(), flag, trace_handler, cData);
+    map_name += name2;
+  }
+  
+  // record it in our own maps
+  if(traces[interp_][map_name].count(proc->get_functor())) { // already recorded
+    traces[interp_][map_name][proc->get_functor()].second |= flag;
+  } else {                        // new
+    traces[interp_][map_name][proc->get_functor()].second = flag;
+    traces[interp_][map_name][proc->get_functor()].first = proc;
+  }
+}
+
+void interpreter::remove_trace(const string& VarName, unsigned int *index, 
+                               void * proc, void * cData, int flag) {
+  if(!traces.count(interp_)) return; // interpreter not found
+  
+  // get variable name
+  string map_name = VarName + "_";
+  string name2;
+  if(index != NULL) name2 = boost::lexical_cast<string>(*index);
+  map_name += name2;
+  
+  if(!traces[interp_].count(map_name)) return; // variable not found
+  
+  if(proc == NULL) {            // all
+    typedef pair<void * const, pair<shared_ptr<trace_base>, int> > trace_record;
+    BOOST_FOREACH(trace_record& m, traces[interp_][map_name]) {
+      if(m.second.second & flag) { // need a untrace operation
+        if(index == NULL) 
+          Tcl_UntraceVar(interp_, VarName.c_str(), flag, 
+                         trace_handler, m.second.first->get_client_data());
+        else 
+          Tcl_UntraceVar2(interp_, VarName.c_str(), name2.c_str(), flag, 
+                         trace_handler, m.second.first->get_client_data());
+      }
+      m.second.second &= (~flag);
+    }
+    trace_record_map::iterator it, end;
+    for(it = traces[interp_][map_name].begin(), end = traces[interp_][map_name].end();
+        it != end; ) {
+      if(it->second.second == 0) traces[interp_][map_name].erase(it++);
+      else it++;
+    }
+  } else {                       // a specific trace
+    if(!traces[interp_][map_name].count(proc)) return; // function not found
+    shared_ptr<details::trace_base>& m = traces[interp_][map_name][proc].first;
+    if(m->get_client_data() != cData) return; // ClientData does not match
+    if(traces[interp_][map_name][proc].second & flag) { // need a untrace operation
+      if(index == NULL) 
+        Tcl_UntraceVar(interp_, VarName.c_str(), flag, 
+                       trace_handler, m->get_client_data());
+      else 
+        Tcl_UntraceVar2(interp_, VarName.c_str(), name2.c_str(), flag, 
+                       trace_handler, m->get_client_data());
+    }
+    traces[interp_][map_name][proc].second &= (~flag);
+    if(traces[interp_][map_name][proc].second == 0)
+      traces[interp_][map_name].erase(proc);
+  }
+
+  if(traces[interp_][map_name].empty()) traces[interp_].erase(map_name);
+}
+
 void interpreter::add_class(string const &name,
      shared_ptr<class_handler_base> chb)
 {
@@ -1122,6 +1241,10 @@ int tcl_cast<int>::from(Tcl_Interp *interp, Tcl_Obj *obj)
      return res;
 }
 
+Tcl_Obj * tcl_cast<int>::to(Tcl_Interp *, int const & v) {
+  return Tcl_NewIntObj(v);
+}
+
 long tcl_cast<long>::from(Tcl_Interp *interp, Tcl_Obj *obj)
 {
      long res;
@@ -1132,6 +1255,10 @@ long tcl_cast<long>::from(Tcl_Interp *interp, Tcl_Obj *obj)
      }
      
      return res;
+}
+
+Tcl_Obj * tcl_cast<long>::to(Tcl_Interp *, long const & v) {
+  return Tcl_NewLongObj(v);
 }
 
 long long tcl_cast<long long>::from(Tcl_Interp *interp, Tcl_Obj *obj)
@@ -1146,6 +1273,10 @@ long long tcl_cast<long long>::from(Tcl_Interp *interp, Tcl_Obj *obj)
      return res;
 }
 
+Tcl_Obj * tcl_cast<long long>::to(Tcl_Interp *, long long const & v) {
+  return Tcl_NewWideIntObj(v);
+}
+
 bool tcl_cast<bool>::from(Tcl_Interp *interp, Tcl_Obj *obj)
 {
      int res;
@@ -1156,6 +1287,10 @@ bool tcl_cast<bool>::from(Tcl_Interp *interp, Tcl_Obj *obj)
      }
      
      return res != 0;
+}
+
+Tcl_Obj * tcl_cast<bool>::to(Tcl_Interp *, bool const & v) {
+  return Tcl_NewBooleanObj(v);
 }
 
 double tcl_cast<double>::from(Tcl_Interp *interp, Tcl_Obj *obj)
@@ -1170,14 +1305,26 @@ double tcl_cast<double>::from(Tcl_Interp *interp, Tcl_Obj *obj)
      return res;
 }
 
+Tcl_Obj * tcl_cast<double>::to(Tcl_Interp *, double const & v) {
+  return Tcl_NewDoubleObj(v);
+}
+
 string tcl_cast<string>::from(Tcl_Interp *, Tcl_Obj *obj)
 {
      return Tcl_GetString(obj);
 }
 
+Tcl_Obj * tcl_cast<string>::to(Tcl_Interp *, string const & v) {
+  return Tcl_NewStringObj(v.c_str(), -1);
+}
+
 char const * tcl_cast<char const *>::from(Tcl_Interp *, Tcl_Obj *obj)
 {
      return Tcl_GetString(obj);
+}
+
+Tcl_Obj * tcl_cast<char const *>::to(Tcl_Interp *, char const * const & v) {
+  return Tcl_NewStringObj(v, -1);
 }
 
 object tcl_cast<object>::from(Tcl_Interp *interp, Tcl_Obj *obj)
@@ -1186,4 +1333,8 @@ object tcl_cast<object>::from(Tcl_Interp *interp, Tcl_Obj *obj)
      o.set_interp(interp);
 
      return o;
+}
+
+Tcl_Obj * tcl_cast<object>::to(Tcl_Interp *, object const & v) {
+  return Tcl_DuplicateObj(v.get_object());
 }
