@@ -29,11 +29,12 @@
 
 class trace_base {
 public:
+  typedef void (*voidFun)();
   virtual ~trace_base() {}
   
   virtual void invoke(Tcl_Interp *interp,
                       ClientData, const char *, const char *, int) = 0;
-  virtual void * get_functor() const = 0;
+  virtual voidFun get_functor() const = 0;
   virtual void * get_client_data() const = 0;
 };
 
@@ -44,8 +45,8 @@ public:
   trace(functor_type f, CDT * cd) : f_(f), cd_(cd) {}
   virtual ~trace() {}
   
-  virtual void * get_functor() const {
-    return f_;
+  virtual voidFun get_functor() const {
+    return reinterpret_cast<voidFun>(f_);
   }
 
   virtual void * get_client_data() const {
@@ -57,13 +58,17 @@ public:
     interpreter i(interp, false);
     // fetch the variable
     Tcl_Obj *var = Tcl_GetVar2Ex(interp, VarName, index, flag);
+    VT orig = tcl_cast<VT>::from(interp, var);
     // run the trace
-    VT rv = f_(tcl_cast<VT>::from(interp, var), static_cast<CDT *>(cData));
-    // reset the variable
-    var = tcl_cast<VT>::to(interp, rv);
-    Tcl_Obj *prv = Tcl_SetVar2Ex(interp, VarName, index, var, flag);
-    assert(prv != var);
-    delete var;                 // delete the tmp var
+    VT rv = f_(orig, static_cast<CDT *>(cData));
+    if(rv != orig) {
+      std::cout << "value changed!" << std::endl;
+      // reset the variable
+      var = tcl_cast<VT>::to(interp, rv);
+      Tcl_Obj *prv = Tcl_SetVar2Ex(interp, VarName, index, var, flag);
+      assert(prv == var);
+      //delete var;                 // delete the tmp var
+    }
   }
 
 private:

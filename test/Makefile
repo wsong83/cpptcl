@@ -25,7 +25,7 @@
 
 INCDIRS = -I./ -I../
 
-OUTPUTS = test1 test2.so test3 test4 test5 test6 test7
+OUTPUTS = test1 test2.so test3 test4 test5 test6 test7 test8
 
 all : build dotest
 
@@ -52,6 +52,9 @@ test6 : test6.cc ../cpptcl.o
 test7 : test7.cc ../cpptcl.o
 	$(CXX) $(INCDIRS) $(CXXFLAGS) $< $(LINKFLAGS) ../cpptcl.o -o $@
 
+test8 : test8.cc ../cpptcl.o
+	$(CXX) $(INCDIRS) $(CXXFLAGS) $< $(LINKFLAGS) ../cpptcl.o -o $@
+
 dotest :
 	./test1
 	tclsh test2.tcl
@@ -60,6 +63,7 @@ dotest :
 	./test5
 	./test6
 	./test7
+	./test8
 
 clean :
 	-rm -f ${OUTPUTS}

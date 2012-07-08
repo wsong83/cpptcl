@@ -54,6 +54,7 @@ extern "C" {
 #include <boost/preprocessor/punctuation/comma_if.hpp>
 #include <boost/preprocessor/iteration/iterate.hpp>
 
+#include <iostream>
 
 namespace Tcl
 {
@@ -379,10 +380,13 @@ public:
      static void clear_definitions(Tcl_Interp *);
 
   // create a trace to a variable
+  // define void function
+  typedef details::trace_base::voidFun voidFun;
+
   // a read trace using variable name
   template<typename VT, typename CDT = void>
   void def_read_trace(const std::string& VarName, // variable name
-                      VT (*proc)(CDT *), // callback function
+                      VT (*proc)(VT const &, CDT *), // callback function
                       CDT *cData = NULL) {  // the data passed to the callback function
     add_trace(VarName, NULL, 
               boost::shared_ptr<details::trace_base>
@@ -427,7 +431,7 @@ public:
 
   // delete a read trace using variable name
   void undef_read_trace(const std::string& VarName, // variable name
-                        void *proc, // callback function
+                        voidFun const proc, // callback function
                         void *cData = NULL) {  // the data passed to the callback function
     remove_trace(VarName, NULL, proc, cData, TCL_TRACE_READS);
   }
@@ -440,7 +444,7 @@ public:
   // delete a read trace using array name and its index
   void undef_read_trace(const std::string& VarName, // variable name
                         unsigned int index,         // the index of a array element
-                        void *proc, // callback function
+                        voidFun const proc, // callback function
                         void *cData = NULL) {  // the data passed to the callback function
     remove_trace(VarName, &index, proc, cData, TCL_TRACE_READS);
   }
@@ -453,7 +457,7 @@ public:
 
   // delete a write trace using variable name
   void undef_write_trace(const std::string& VarName, // variable name
-                         void *proc, // callback function
+                         voidFun const proc, // callback function
                          void *cData = NULL) {  // the data passed to the callback function
     remove_trace(VarName, NULL, proc, cData, TCL_TRACE_WRITES);
   }
@@ -464,11 +468,10 @@ public:
   }
 
   // delete a write trace using array name and its index
-  template<typename VT, typename CDT = void>
   void undef_write_trace(const std::string& VarName, // variable name
                          unsigned int index,         // the index of a array element
-                         VT (*proc)(const std::string&, CDT *), // callback function
-                         CDT *cData = NULL) {  // the data passed to the callback function
+                         voidFun const proc, // callback function
+                         void *cData = NULL) {  // the data passed to the callback function
     remove_trace(VarName, &index, proc, cData, TCL_TRACE_WRITES);
   }
   
@@ -505,7 +508,7 @@ private:
                  void * cData, int flag);
 
   void remove_trace(const std::string& VarName, unsigned int *index, 
-                    void * proc, void * cData, int flag);
+                    voidFun proc, void * cData, int flag);
 
      void add_class(std::string const &name,
           boost::shared_ptr<details::class_handler_base> chb);

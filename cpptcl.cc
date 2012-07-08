@@ -230,7 +230,7 @@ callback_map callbacks;
 callback_map constructors;
 
   // map of polymorphic variable traces
-  typedef map<void *, pair<shared_ptr<trace_base>, int > > trace_record_map;
+  typedef map<trace_base::voidFun, pair<shared_ptr<trace_base>, int > > trace_record_map;
   typedef map<string, trace_record_map> trace_interp_map;
   typedef map<Tcl_Interp *, trace_interp_map> trace_map;
 
@@ -425,7 +425,7 @@ char * trace_handler(ClientData cData, Tcl_Interp *interp,
     return err_msg_trace_no_var;
   }
   
-  typedef pair<void * const, pair<shared_ptr<details::trace_base>, int> > trace_record;
+  typedef pair<trace_base::voidFun const, pair<shared_ptr<details::trace_base>, int> > trace_record;
   BOOST_FOREACH(trace_record& m, traces[interp][map_name]) {
     if(m.second.second & flags) {
       try {
@@ -1161,7 +1161,7 @@ void interpreter::add_trace(const string& VarName, unsigned int *index,
 }
 
 void interpreter::remove_trace(const string& VarName, unsigned int *index, 
-                               void * proc, void * cData, int flag) {
+                               voidFun const proc, void * cData, int flag) {
   if(!traces.count(interp_)) return; // interpreter not found
   
   // get variable name
@@ -1173,7 +1173,7 @@ void interpreter::remove_trace(const string& VarName, unsigned int *index,
   if(!traces[interp_].count(map_name)) return; // variable not found
   
   if(proc == NULL) {            // all
-    typedef pair<void * const, pair<shared_ptr<trace_base>, int> > trace_record;
+    typedef pair<trace_base::voidFun const, pair<shared_ptr<trace_base>, int> > trace_record;
     BOOST_FOREACH(trace_record& m, traces[interp_][map_name]) {
       if(m.second.second & flag) { // need a untrace operation
         if(index == NULL) 
