@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Cpptcl : C++/Tcl, a library that allows to easily integrate C++ and Tcl." />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Cpptcl</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/wsong83/cpptcl">View on GitHub</a>
+
+          <h1 id="project_title">Cpptcl</h1>
+          <h2 id="project_tagline">C++/Tcl, a library that allows to easily integrate C++ and Tcl.</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/wsong83/cpptcl/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/wsong83/cpptcl/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+
+
+
+[<a href="callpolicies.html">prev</a>][<a href="index.html">top</a>][<a
+ href="goodies.html">next</a>]<br>
+<h4>Variable Traces<br>
+</h4>
+Define and remove trace functions to Tcl variables.<br>
+<br>
+
+<h4><a name="define"></a>Define a trace function</h4>
+
+Tcl allows users to define trace functions to monitor or even control the access of a Tcl variable. <br>
+<br>
+Starting from version 1.1.4.001, C++/Tcl provides easy interfaces to define read and write traces for Tcl variables.
+If a tcl variable is associated with a read trace, the trace function is called <span style="font-weight: bold;">before</span> the variable is read; therefor, the trace function can modify the variable value which results in a different value been read. On the other hand, for a write trace, it is called <span style="font-weight: bold;">after</span> the associated variable is written; therefore, the trace function can modify the actual value written to the variable. It is possible to use a write trace to implement a read-only variable.<br>
+<br>
+The trace function allowed in the C++/Tcl library must have the following format:<br>
+<br><pre><code>template&lt;typename VT, typename CDT&gt;
+VT trace_function (VT const & var, CDT * cData);
+</code></pre><br>
+where <code>VT</code> is the value type of the Tcl variable, and <code>CDT</code> defines the type of user data structure passed to the trace function. <br>
+<br>
+As long as a data type <code>T</code> is supported by <code>get&lt;T&gt;</code> (see <a href="objects.html">Objects and Lists</a>, 4), it can be used as <code>VT</code> for the trace function.<br> 
+<br>
+The trace function reads in the current value of the variable <code>var</code> and returns a new value. If the returned value is different with <code>var</code>, the returned value will be written to the traced Tcl variable.<br>
+<br>
+Currently, only a pointer pointing to a user data can be passed to the trace function (an absolute data will be lost).<br>
+<br>
+Several member methods are provided in <code>Tcl::interpreter</code> to define trace functions:<br>
+<br><pre><code>// define read trace
+template&lt;typename VT, typename CDT&gt;
+void interpreter::def_read_trace(const string& VarName, 
+                                 const string& FunName, 
+                                 VT (*proc)(VT const &, CDT *), CDT *cData = NULL);
+
+template&lt;typename VT, typename CDT&gt;
+void interpreter::def_read_trace(const string& VarName, unsigned int index, 
+                                 const string& FunName, 
+                                 VT (*proc)(VT const &, CDT *), CDT *cData = NULL);
+
+// define write trace
+template&lt;typename VT, typename CDT&gt;
+void interpreter::def_write_trace(const string& VarName, 
+                                  const string& FunName, 
+                                  VT (*proc)(VT const &, CDT *), CDT *cData = NULL);
+
+template&lt;typename VT, typename CDT&gt;
+void interpreter::def_write_trace(const string& VarName, unsigned int index, 
+                                  const string& FunName, 
+                                  VT (*proc)(VT const &, CDT *), CDT *cData = NULL);
+</code></pre><br>
+where <code>VarName</code> is the name of the Tcl variable to be traced; <code>index</code> identifies the the index if only one element in an variable array is traced; <code>FunName</code> is an unique string to identify a trace function, otherwise the trace function is lost; <code>proc</code> is the real function pointer pointing to the trace function; and <code>cData</code> is the user data to be passed to the trace function.<br>
+<br>
+Tcl allows to trace a variable before it is define. This is actually saying a trace can be pre-set to an unknown variable and it will be called when the variable is actually set in Tcl. <code>FunName</code> is used as an id to identify a trace function. It is not necessary to pair a <code>FunName</code> with a trace function <code>proc</code>. Therefore, it is legal to define a trace function <code>proc</code> more than one time to the same variable using different <code>FunName</code>s. Tracing different variables using the same trace function is always allowed. When no user data is passed, argument <code>cData</code> can be omitted as it is <code>NULL</code> by default.<br>
+
+<h4><a name="remove"></a>Remove a defined trace</h4>
+
+It is possible to remove a trace on the run. Several member methods are provide for this purpose:<br>
+<br><pre><code>// remove a read trace
+void interpreter::undef_read_trace(const string& VarName, 
+                                   const string& FunName = "");
+
+void interpreter::undef_read_trace(const string& VarName, unsigned int index, 
+                                   const string& FunName = "");
+
+// remove a write trace
+void interpreter::undef_write_trace(const string& VarName, 
+                                    const string& FunName = "");
+
+void interpreter::undef_write_trace(const string& VarName, unsigned int index, 
+                                    const string& FunName = "");
+
+// delete all traces
+void interpreter::undef_all_trace(const string& VarName);
+
+void interpreter::undef_all_trace(const string& VarName, unsigned int index);
+</code></pre><br>
+When <code>FunName</code> is not provided or assigned empty, all trace functions associated with the target variable are removed; otherwise, only the trace function identified by <code>FunName</code> is removed. <code>undef_all_trace()</code> is used to remove all traces associated with a variable.<br>
+
+<h4><a name="remove"></a>Example</h4>
+The following simple example demonstrates how to use this feature. A more complicated example can be found in <code>test8.cc</code>.<br>
+<br><pre><code>// example of variable traces
+
+#include "cpptcl.h"
+#include &lt;iostream&gt;
+
+using std::cout;
+using std::endl;
+using std::string;
+using namespace Tcl;
+
+
+int read_trace(const int& v, void *) {
+  cout &lt;&lt; "read trace triggered." &lt;&lt; endl;
+  return v;
+}
+
+int write_trace(const int& v, int * cd) {
+  cout &lt;&lt; "write trace triggered." &lt;&lt; endl;
+  
+  // set the user data to the current variable value
+  *cd = v;
+  
+  // modify the variable value
+  return v+1;                   
+}
+
+int main() {
+  interpreter i;
+  int env = 5;     // user data
+
+  i.def_read_trace("tcl_var", "read", read_trace);
+  i.def_write_trace("tcl_var", "write", write_trace, &env);
+
+  // test write trace
+  string rv = i.eval("set tcl_var 20");
+  // stdout: write trace triggered.
+  assert(rv == "21");           // the actual value is 20 + 1
+
+  // test read trace
+  i.eval("set tcl_var");
+  // stdout: read trace triggered.
+
+  i.undef_read_trace("tcl_var", "read");
+  i.eval("set tcl_var");
+  // stdout: [nothing]
+  //   since read trace is removed
+
+  i.undef_all_trace("tcl_var");
+  string rv1 = i.eval("set tcl_var 20");
+  // stdout: [nothing]
+  //   since write trace is removed
+  assert(rv1 == "20");           // back to normal behaviour
+}
+</code></pre><br>
+
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Cpptcl maintained by <a href="https://github.com/wsong83">wsong83</a></p>
+        <p>Copyright &copy; 2012, Wei Song; Copyright &copy; 2004-2006, Maciej Sobczak</p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>

@@ -430,50 +430,28 @@ public:
 
   // delete a read trace using variable name
   void undef_read_trace(const std::string& VarName, // variable name
-                        const std::string& FunName) { 
+                        const std::string& FunName = "") { 
     remove_trace(VarName, NULL, FunName, TCL_TRACE_READS);
-  }
-  
-  // delete all read traces using variable name
-  void undef_read_trace(const std::string& VarName) { // variable name
-    remove_trace(VarName, NULL, "", TCL_TRACE_READS);
   }
 
   // delete a read trace using array name and its index
   void undef_read_trace(const std::string& VarName, // variable name
                         unsigned int index,         // the index of a array element
-                        const std::string& FunName) { 
+                        const std::string& FunName = "") { 
     remove_trace(VarName, &index, FunName, TCL_TRACE_READS);
-  }
-  
-  // delete all read traces using array name and its index
-  void undef_read_trace(const std::string& VarName, // variable name
-                            unsigned int index) { // the index of a array element
-    remove_trace(VarName, &index, "", TCL_TRACE_READS);
   }
 
   // delete a write trace using variable name
   void undef_write_trace(const std::string& VarName, // variable name
-                         const std::string& FunName) { 
+                         const std::string& FunName = "") { 
     remove_trace(VarName, NULL, FunName, TCL_TRACE_WRITES);
-  }
-  
-  // delete all write traces using variable name
-  void undef_write_trace(const std::string& VarName) { // variable name
-    remove_trace(VarName, NULL, "", TCL_TRACE_WRITES);
   }
 
   // delete a write trace using array name and its index
   void undef_write_trace(const std::string& VarName, // variable name
                          unsigned int index,         // the index of a array element
-                         const std::string& FunName) { 
+                         const std::string& FunName = "") { 
     remove_trace(VarName, &index, FunName, TCL_TRACE_WRITES);
-  }
-  
-  // delete all write traces using array name and its index
-  void undef_write_trace(const std::string& VarName, // variable name
-                             unsigned int index) { // the index of a array element
-    remove_trace(VarName, NULL, "", TCL_TRACE_WRITES);
   }
 
   // delete all traces using variable name

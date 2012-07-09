@@ -1146,6 +1146,11 @@ void interpreter::add_trace(const string& VarName, unsigned int *index,
                             const std::string& FunName,
                             shared_ptr<trace_base> proc,
                             void * cData, int flag) {
+  // empty function name is not allowed. 
+  // Due to the standard result, no return or error is indicated. 
+  // This is at user's risk.
+  if(FunName.empty()) return;   
+  
   string map_name = VarName + "_";
   string name2;
   if(index != NULL) {
