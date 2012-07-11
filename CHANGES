@@ -1,3 +1,4 @@
+10/07/2012 support vector<string>.
 10/07/2012 add support to handl Tcl variables.
 10/07/2012 correct an early return  bug in interpreter::clear_definitions().
 
