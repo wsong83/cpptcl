@@ -18,38 +18,24 @@
 #    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
 #
 # Makefile
-# Due to be replace by autoconf tool suite
 # 04/07/2012   Wei Song
 #
 #
 
 INCDIRS = -I./ -I../
 
-OUTPUTS = mymodule1.so example2 mymodule3.so mymodule4.so mymodule5.so example6 mymodule7.so
+OUTPUTS = example1.so example3.so example4.so example5.so example7.so
 
-all : ${OUTPUTS}
+all : ${OUTPUTS} example2 example6 
 
-mymodule1.so : example1.cc ../cpptcl.o
-	$(CXX) -shared $(INCDIRS) $(CXXFLAGS) $< ../cpptcl.o -o $@
+$(OUTPUTS) : %.so:%.cc ../cpptcl.o
+	$(CXX) $(INCDIRS) $(CXXFLAGS) $< ../cpptcl.o $(SHARED_LINKFLAGS) -o $@
 
 example2 : example2.cc ../cpptcl.o
-	$(CXX) $(INCDIRS) $(CXXFLAGS) $< $(LINKFLAGS) ../cpptcl.o -o $@
-
-mymodule3.so : example3.cc ../cpptcl.o
-	$(CXX) -shared $(INCDIRS) $(CXXFLAGS) $< ../cpptcl.o -o $@
-
-mymodule4.so : example4.cc ../cpptcl.o
-	$(CXX) -shared $(INCDIRS) $(CXXFLAGS) $< ../cpptcl.o -o $@
-
-mymodule5.so : example5.cc ../cpptcl.o
-	$(CXX) -shared $(INCDIRS) $(CXXFLAGS) $< ../cpptcl.o -o $@
+	$(CXX) $(INCDIRS) $(CXXFLAGS) $< ../cpptcl.o $(OBJ_LINKFLAGS) -o $@
 
 example6 : example6.cc ../cpptcl.o
-	$(CXX) $(INCDIRS) $(CXXFLAGS) $< $(LINKFLAGS) ../cpptcl.o -o $@
-
-mymodule7.so : example7.cc ../cpptcl.o
-	$(CXX) -shared $(INCDIRS) $(CXXFLAGS) $< ../cpptcl.o -o $@
-
+	$(CXX) $(INCDIRS) $(CXXFLAGS) $< ../cpptcl.o $(OBJ_LINKFLAGS) -o $@
 
 clean :
-	-rm -f ${OUTPUTS}
+	-rm -f ${OUTPUTS} example2 example6

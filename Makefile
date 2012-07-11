@@ -23,10 +23,27 @@
 #
 
 # global variables
+# C++ compiler
 export CXX = g++
 
-export CXXFLAGS = -std=c++0x -Wall -g -fPIC
-export LINKFLAGS = -ltcl8.5
+# the Tcl library
+OS_NAME := $(shell uname)
+# Linux
+ifeq ($(OS_NAME), Linux)
+  TCL_OBJ_LINKFLAG = -ltcl
+  TCL_SHARED_LINKFLAG = -shared
+endif
+
+# other systems, such as MinGW
+ifeq ($(OS_NAME), MinGW)
+  TCL_OBJ_LINKFLAG = -ltcl
+  TCL_SHARED_LINKFLAG = -shared $(shell which tcl85.dll)
+endif
+
+# export the flags to all sub-directories
+export CXXFLAGS = -std=c++0x -Wall -Wextra -g -fPIC
+export OBJ_LINKFLAGS = $(TCL_OBJ_LINKFLAG)
+export SHARED_LINKFLAGS = $(TCL_SHARED_LINKFLAG)
 
 # local variables
 INCDIRS = -I./

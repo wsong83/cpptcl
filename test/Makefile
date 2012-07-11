@@ -18,42 +18,23 @@
 #    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
 #
 # Makefile
-# Due to be replace by autoconf tool suite
 # 04/07/2012   Wei Song
 #
 #
 
 INCDIRS = -I./ -I../
 
-OUTPUTS = test1 test2.so test3 test4 test5 test6 test7 test8
+OUTPUTS = test1 test3 test4 test5 test6 test7 test8
 
-all : build dotest
+all : build test2.so dotest
 
 build : $(OUTPUTS)
 
-test1 : test1.cc ../cpptcl.o
-	$(CXX) $(INCDIRS) $(CXXFLAGS) $< $(LINKFLAGS) ../cpptcl.o -o $@
+$(OUTPUTS) : %:%.cc ../cpptcl.o
+	$(CXX) $(INCDIRS) $(CXXFLAGS) $< ../cpptcl.o $(OBJ_LINKFLAGS) -o $@
 
 test2.so : test2.cc ../cpptcl.o
-	$(CXX) -shared $(INCDIRS) $(CXXFLAGS) $< ../cpptcl.o -o $@
-
-test3 : test3.cc ../cpptcl.o
-	$(CXX) $(INCDIRS) $(CXXFLAGS) $< $(LINKFLAGS) ../cpptcl.o -o $@
-
-test4 : test4.cc ../cpptcl.o
-	$(CXX) $(INCDIRS) $(CXXFLAGS) $< $(LINKFLAGS) ../cpptcl.o -o $@
-
-test5 : test5.cc ../cpptcl.o
-	$(CXX) $(INCDIRS) $(CXXFLAGS) $< $(LINKFLAGS) ../cpptcl.o -o $@
-
-test6 : test6.cc ../cpptcl.o
-	$(CXX) $(INCDIRS) $(CXXFLAGS) $< $(LINKFLAGS) ../cpptcl.o -o $@
-
-test7 : test7.cc ../cpptcl.o
-	$(CXX) $(INCDIRS) $(CXXFLAGS) $< $(LINKFLAGS) ../cpptcl.o -o $@
-
-test8 : test8.cc ../cpptcl.o
-	$(CXX) $(INCDIRS) $(CXXFLAGS) $< $(LINKFLAGS) ../cpptcl.o -o $@
+	$(CXX) $(INCDIRS) $(CXXFLAGS) $< ../cpptcl.o $(SHARED_LINKFLAGS) -o $@
 
 dotest :
 	./test1
@@ -66,4 +47,4 @@ dotest :
 	./test8
 
 clean :
-	-rm -f ${OUTPUTS}
+	-rm -f ${OUTPUTS} test2.so
