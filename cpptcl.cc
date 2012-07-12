@@ -225,7 +225,7 @@ namespace // unnamed
 
 // map of polymorphic callbacks
 typedef map<string, shared_ptr<callback_base> > callback_interp_map;
-typedef map<Tcl_Interp *, callback_interp_map> callback_map;
+typedef map<void *, callback_interp_map> callback_map;
 
 callback_map callbacks;
 callback_map constructors;
@@ -234,19 +234,19 @@ callback_map constructors;
   typedef pair<const string, tuple<shared_ptr<trace_base>, int, void *> > trace_record;
   typedef map<const string, tuple<shared_ptr<trace_base>, int, void *> > trace_record_map;
   typedef map<pair<string, string>, trace_record_map> trace_interp_map;
-  typedef map<Tcl_Interp *, trace_interp_map> trace_map;
+  typedef map<void *, trace_interp_map> trace_map;
 
   trace_map traces;
 
 // map of call policies
 typedef map<string, policies> policies_interp_map;
-typedef map<Tcl_Interp *, policies_interp_map> policies_map;
+typedef map<void *, policies_interp_map> policies_map;
 
 policies_map call_policies;
 
 // map of object handlers
 typedef map<string, shared_ptr<class_handler_base> > class_interp_map;
-typedef map<Tcl_Interp *, class_interp_map> class_handlers_map;
+typedef map<void *, class_interp_map> class_handlers_map;
 
 class_handlers_map class_handlers;
 
@@ -1124,10 +1124,28 @@ void interpreter::clear_definitions(Tcl_Interp *interp)
     trace_interp_map &tmap = traces[interp];
     trace_interp_map::iterator it, end;
     for(it=tmap.begin(), end=tmap.end(); it!=end; it++) {
-      if(it->first.second == "")
-        undef_all_trace(it->first.first);
-      else
-        undef_all_trace(it->first.first, std::atoi(it->first.second.c_str()));
+      if(it->first.second == "") {
+        string VarName = it->first.first;
+        BOOST_FOREACH(trace_record& m, it->second) {
+          if(m.second.get<1>() & TCL_TRACE_READS)
+            Tcl_UntraceVar(interp, VarName.c_str(), TCL_TRACE_READS, 
+                           trace_handler, &(m.second.get<2>()));
+          if(m.second.get<1>() &TCL_TRACE_WRITES)
+            Tcl_UntraceVar(interp, VarName.c_str(), TCL_TRACE_WRITES, 
+                           trace_handler, &(m.second.get<2>()));
+        }
+      } else {
+        string VarName = it->first.first;
+        string index = it->first.second;
+        BOOST_FOREACH(trace_record& m, it->second) {
+          if(m.second.get<1>() & TCL_TRACE_READS)
+            Tcl_UntraceVar2(interp, VarName.c_str(), index.c_str(), TCL_TRACE_READS, 
+                           trace_handler, &(m.second.get<2>()));
+          if(m.second.get<1>() &TCL_TRACE_WRITES)
+            Tcl_UntraceVar2(interp, VarName.c_str(), index.c_str(), TCL_TRACE_WRITES, 
+                           trace_handler, &(m.second.get<2>()));
+        }
+      }
     }
     traces.erase(interp);
   }
@@ -1139,7 +1157,7 @@ void interpreter::clear_definitions(Tcl_Interp *interp)
          it2 != imap.end(); ++it2) {
       Tcl_DeleteCommand(interp, it2->first.c_str());
     }
-    callbacks.erase(interp);
+    constructors.erase(interp);
   }
 
   // delete all call policies

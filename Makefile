@@ -32,21 +32,23 @@ OS_NAME := $(shell uname)
 ifeq ($(OS_NAME), Linux)
   TCL_OBJ_LINKFLAG = -ltcl
   TCL_SHARED_LINKFLAG = -shared
+  PIC_FLAG = -fPIC
 endif
 
 # other systems, such as MinGW
-ifeq ($(OS_NAME), MinGW)
-  TCL_OBJ_LINKFLAG = -ltcl
+ifneq ($(findstring MinGW, $(OS_NAME)),)
+  TCL_OBJ_LINKFLAG = -ltcl85 -L/usr/local/lib
   TCL_SHARED_LINKFLAG = -shared $(shell which tcl85.dll)
+  PIC_FLAG =
 endif
 
 # export the flags to all sub-directories
-export CXXFLAGS = -std=c++0x -Wall -Wextra -g -fPIC
+export CXXFLAGS = -std=c++0x -Wall -Wextra -g $(PIC_FLAG)
 export OBJ_LINKFLAGS = $(TCL_OBJ_LINKFLAG)
 export SHARED_LINKFLAGS = $(TCL_SHARED_LINKFLAG)
 
 # local variables
-INCDIRS = -I./
+INCDIRS = -I.
 HEADERS = $(wildcard ./*.h)
 HEADERS += $(wildcard ./details/*.h)
 HEADERS += $(wildcard ./preproc/*.hpp)
@@ -78,5 +80,4 @@ clean:
 	-rm *.o
 	-for d in $(EXAMPLEDIRS); do $(MAKE) -C $$d clean; done
 	-for d in $(TESTDIRS); do $(MAKE) -C $$d clean; done
-	-rm bin/avs_shell
 

@@ -22,7 +22,7 @@
 #
 #
 
-INCDIRS = -I./ -I../
+INCDIRS = -I. -I..
 
 OUTPUTS = example1.so example3.so example4.so example5.so example7.so
 
