@@ -34,6 +34,8 @@ using std::endl;
 using std::string;
 using namespace Tcl;
 
+interpreter i;
+
 bool read_trace_bool(const bool& v, void *) {
   return !v;
 }
@@ -53,7 +55,7 @@ int write_trace_int(const int& v, int * cd) {
 }
 
 void test_read_trace() {
-  interpreter i;
+  //interpreter i;
   int env = 10;
   i.def_read_trace("vbool", "read_trace_bool", read_trace_bool); // add trace
   i.def_read_trace("vint", "read_trace_int", read_trace_int, &env);
@@ -85,7 +87,7 @@ void test_write_trace() {
 }
 
 void test_read_and_write_trace() {
-  interpreter i;
+  //interpreter i;
   int env = 10;
   i.def_read_trace("vbool", "read_trace_bool", read_trace_bool); // add trace
   i.def_read_trace("vint", "read_trace_int", read_trace_int, &env);

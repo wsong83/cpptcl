@@ -95,6 +95,7 @@ policies variadic();
 
 class interpreter;
 class object;
+class tcl_name_database;
 
 namespace details
 {
@@ -537,6 +538,8 @@ private:
 
      Tcl_Interp *interp_;
      bool owner_;
+     // ensure the global database is not release before the release of all interpreters
+     boost::shared_ptr<tcl_name_database> db_; 
 };
 
 
