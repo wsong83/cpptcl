@@ -293,6 +293,7 @@ public:
      virtual ~interpreter();
      
      void make_safe();
+     void tcl_init();                // call Tcl_Init() to set up OS variables
      
      Tcl_Interp * get() const { return interp_; }
 

@@ -1,5 +1,11 @@
 This file contains the history of changes in the C++/Tcl library.
 
+(August 24 2012)
+Add a new method "tcl_init()" in interpreter to call Tcl_Init() API.
+Tcl_Init() will read in System/OS predefined tcl environment, including
+the auto_path variable needed for tcl packages.
+[According to the request from Kashev Dalmia]
+
 --- (July 31 2012)
 The version 1.1.4.001 differs from 1.1.4 in the following ways:
 

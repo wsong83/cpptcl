@@ -1072,6 +1072,12 @@ void interpreter::make_safe()
      }
 }
 
+void interpreter::tcl_init() {
+  if(Tcl_Init(interp_) != TCL_OK) {
+    throw tcl_error("Fail to initialize Tcl!");
+  }
+}
+
 result interpreter::eval(string const &script)
 {
      int cc = Tcl_Eval(interp_, script.c_str());
